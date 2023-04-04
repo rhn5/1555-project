@@ -29,11 +29,11 @@ CREATE TABLE profile (
     CONSTRAINT profile_dateOfBirth CHECK (dateOfBirth <= CURRENT_DATE),
     -- Additional Semantic Integrity Constraints
     -- Constraint to check if the password length is at least 8 characters long
-    CONSTRAINT profile_password_length CHECK (LENGTH(password) >= 8),
+    CONSTRAINT profile_password_length CHECK (LENGTH(password) >= 8)
     -- Constraint to check if the password contains at least one uppercase letter, one lowercase letter, and one number
-    CONSTRAINT profile_password_complexity CHECK (password ~ '^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).+$'),
+    --CONSTRAINT profile_password_complexity CHECK (password ~ '^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).+$'),
     -- Constraint to check if the email format is valid
-    CONSTRAINT profile_email_format CHECK (email ~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+    --CONSTRAINT profile_email_format CHECK (email ~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
 
 );
 
@@ -154,8 +154,11 @@ CREATE TABLE message (
 
     -- Semantic Integrity Constraints
     -- Constraint to check if at least one of toUserID and toGroupID is not null
-    CONSTRAINT message_toUserID_or_toGroupID CHECK (toUserID IS NOT NULL OR toGroupID IS NOT NULL)
+    CONSTRAINT message_toUserID_or_toGroupID CHECK (toUserID IS NOT NULL OR toGroupID IS NOT NULL),
 
+    -- Add a constraint to check that fromID and toUserID are not equal to each other,
+    -- which prevents users from sending friend messages to themselves and maintains the integrity of the data
+    CONSTRAINT pendingFriend_userID_not_equal CHECK (fromID <> toUserID)
 );
 
 -- Create the messageRecipient table
