@@ -1,17 +1,22 @@
 -- This Function Was Made Under The Idea That Users Could Follow Each Other
--- Only When Do Both Users Follow Each Other Would They Be Made Friends
 CREATE OR REPLACE FUNCTION follow_user() RETURNS TRIGGER AS $$
 DECLARE
     user2_following_user1 INTEGER;
     message_text VARCHAR(100);
+    new_msg_id INTEGER;
 BEGIN
     SELECT COUNT(*) INTO user2_following_user1 FROM pendingFriend WHERE fromID = NEW.toID AND toID = NEW.fromID;
 
-        -- User1 Followed User2 (User2 does not follow User1) Notify User2 They Were Followed
+    -- Generate a unique msgID value
+    LOOP
+        new_msg_id := FLOOR(RANDOM() * 100000) + 1;
+        EXIT WHEN NOT EXISTS (SELECT * FROM message WHERE msgID = new_msg_id);
+    END LOOP;
+
+    -- User1 Followed User2 (User2 does not follow User1) Notify User2 They Were Followed
     IF user2_following_user1 = 0 THEN
         message_text := 'User ' || NEW.fromID || ' Followed You! Follow Them Back To Become Friends!';
-        INSERT INTO message VALUES(NEW.fromID, NEW.toID, message_text);
-        INSERT INTO pendingFriend (fromID, toID, requestText) VALUES (NEW.fromID, NEW.toID, NEW.requestText);
+        INSERT INTO message VALUES(new_msg_id, NEW.fromID, message_text, NEW.toID, NULL, NOW());
     ELSE
         -- User1 Followed User2 (User2 already follows User1) Notify Both Users of New Friend Ship
         INSERT INTO friend(userid1, userid2) VALUES(NEW.fromID, NEW.toID);
@@ -19,8 +24,8 @@ BEGIN
         message_text := 'User ' || NEW.fromID || ' and User ' || NEW.toID || ' are now friends!';
 
         -- Send New Friend Message
-        INSERT INTO message(fromid, touserid, messagebody)
-        VALUES(NEW.fromID, NEW.toID, message_text);
+        INSERT INTO message(msgID, fromid, touserid, messagebody, timeSent)
+        VALUES(new_msg_id, NEW.fromID, NEW.toID, message_text, NOW());
 
         -- Remove from pendingFriend (Followers List)
         DELETE FROM pendingFriend WHERE (fromID = NEW.fromID AND toID = NEW.toID) OR (fromID = NEW.toID AND toID = NEW.fromID);
@@ -86,118 +91,104 @@ EXECUTE FUNCTION addMessageRecipient();
 CREATE OR REPLACE FUNCTION updateGroup()
 RETURNS TRIGGER AS $$
 DECLARE
-    isAdminExists INTEGER;
     groupName VARCHAR(50);
     member_count INTEGER;
     adminID INTEGER;
+    generated_message_id INTEGER;
 BEGIN
     SELECT COUNT(*) INTO member_count from groupMember where gID = NEW.gID;
     SELECT userID INTO adminID FROM groupMember WHERE gID = NEW.gID AND role = 'Admin' LIMIT 1;
+    SELECT name INTO groupName FROM groupinfo WHERE gID = NEW.gID;
 
-    IF TG_OP = 'DELETE' THEN -- user removed from groupMember
-        IF OLD.role = 'Member' THEN
-            -- send message to all group members with 'Admin' role
-            FOR isAdminExists IN
-                SELECT 1 FROM groupMember WHERE gID = OLD.gID AND role = 'Admin'
-            LOOP
-                INSERT INTO message (fromID, messageBody, toUserID, timeSent)
-                VALUES (OLD.userID, CONCAT('User ', OLD.userID, ' has left ', groupName),
-                        (SELECT userID FROM groupMember WHERE gID = OLD.gID AND role = 'Admin' LIMIT 1), NOW());
-            END LOOP;
-
-        ELSEIF OLD.role = 'Admin' THEN
-            -- send message to all group members
-            FOR isAdminExists IN
-                SELECT 1 FROM groupMember WHERE gID = OLD.gID
-            LOOP
-                INSERT INTO message (fromID, messageBody, toUserID, timeSent)
-                VALUES (OLD.userID, CONCAT('Admin User ', OLD.userID, ' has left ', groupName),
-                        (SELECT userID FROM groupMember WHERE gID = OLD.gID AND role = 'Admin' LIMIT 1), NOW());
-            END LOOP;
-
-        END IF;
-
-    ELSIF TG_OP = 'INSERT' AND NEW.role = 'Member' THEN -- user added to groupMember
-        -- get group name
-        SELECT name INTO groupName FROM groupInfo WHERE gID = NEW.gID;
-
-        IF member_count = 0 AND adminID IS NOT NULL THEN
-            -- send message to the user added
-            INSERT INTO message (fromID, messageBody, toUserID, timeSent)
-            VALUES (adminID, CONCAT('You have been accepted into ', groupName, '!'), NEW.userID, NOW());
-        END IF;
-
-        -- add the user to the groupMember table with role 'Member'
-        INSERT INTO groupMember (gID, userID, role, lastConfirmed)
-        VALUES (NEW.gID, NEW.userID, 'Member', NOW());
-
-        -- remove the user from the pendingGroupMember table
-        DELETE FROM pendingGroupMember WHERE gID = NEW.gID AND userID = NEW.userID;
-
-    ELSIF TG_OP = 'INSERT' AND NEW.role = 'Admin' THEN -- admin added to groupMember
-        -- get group name
-        SELECT name INTO groupName FROM groupInfo WHERE gID = NEW.gID;
-
+    IF TG_OP = 'INSERT' THEN
         IF member_count = 0 THEN
-            IF adminID IS NOT NULL THEN
-                -- send message to the user added
-                INSERT INTO message (fromID, messageBody, toUserID, timeSent)
-                VALUES (adminID, CONCAT('You have been accepted into ', groupName, ' As An Admin!'), NEW.userID, NOW());
+            update groupmember set role = 'Admin' where userid = NEW.userid;
+        ELSIF NEW.role = 'Member' THEN
+            LOOP
+                generated_message_id := FLOOR(RANDOM() * 100000) + 1;
+                EXIT WHEN NOT EXISTS (SELECT * FROM message WHERE msgID = generated_message_id);
+            END LOOP;
 
-                FOR isAdminExists IN
-                        SELECT 1 FROM groupMember WHERE gID = OLD.gID AND role = 'Admin'
-                    LOOP
-                        IF NEW.userID <> OLD.userID THEN
-                            INSERT INTO message (fromID, messageBody, toUserID, timeSent)
-                            VALUES (adminID, CONCAT('User ', OLD.userID, ' has been added as an Admin to ', groupName),
-                                    (SELECT userID FROM groupMember WHERE gID = OLD.gID AND role = 'Admin' LIMIT 1), NOW());
-                        END IF;
-                    END LOOP;
-            END IF;
+            INSERT INTO message (msgID, fromid, messagebody, togroupid, timesent)
+            VALUES (generated_message_id, NEW.userid, CONCAT('User Added To Group: ', groupName, ' As A Member'), NEW.gID, NOW());
+
+            LOOP
+                generated_message_id := FLOOR(RANDOM() * 100000) + 1;
+                EXIT WHEN NOT EXISTS (SELECT * FROM message WHERE msgID = generated_message_id);
+            END LOOP;
+            INSERT INTO message (msgID, fromid, messagebody, togroupid, timesent)
+            VALUES (generated_message_id, NEW.userid, CONCAT('You Have Been  Added To Group: ', groupName, ' As A Member'), NEW.gID, NOW());
+
+            DELETE FROM pendingGroupMember WHERE gID = NEW.gID AND userID = NEW.userID;
+            RETURN NEW;
+
+        ELSEIF NEW.role = 'Admin' THEN
+            LOOP
+                generated_message_id := FLOOR(RANDOM() * 100000) + 1;
+                EXIT WHEN NOT EXISTS (SELECT * FROM message WHERE msgID = generated_message_id);
+            END LOOP;
+            INSERT INTO message (msgID, fromid, messagebody, togroupid, timesent)
+            VALUES (generated_message_id, NEW.userid, CONCAT('User Added To Group: ', groupName, ' As An Admin'), NEW.gID, NOW());
+
+            LOOP
+                generated_message_id := FLOOR(RANDOM() * 100000) + 1;
+                EXIT WHEN NOT EXISTS (SELECT * FROM message WHERE msgID = generated_message_id);
+            END LOOP;
+            INSERT INTO message (msgID, fromid, messagebody, toGroupID, timesent)
+            VALUES (generated_message_id, NEW.userid, CONCAT('You Have Been Added To Group: ', groupName, ' As An Admin'), NEW.gID, NOW());
+
+
+            DELETE FROM pendingGroupMember WHERE gID = NEW.gID AND userID = NEW.userID;
+            RETURN NEW;
         END IF;
-        -- add the user to the groupMember table with role 'Admin'
-        INSERT INTO groupMember (gID, userID, role, lastConfirmed)
-        VALUES (NEW.gID, NEW.userID, 'Admin', NOW());
-
-        -- remove the user from the pendingGroupMember table
-        DELETE FROM pendingGroupMember WHERE gID = NEW.gID AND userID = NEW.userID;
-
-    ELSIF TG_OP = 'UPDATE' THEN -- user promoted or demoted
-        -- get group name
-        SELECT name INTO groupName FROM groupInfo WHERE gID = OLD.gID;
-
+    ELSIF TG_OP = 'UPDATE' THEN
         IF OLD.role = 'Member' AND NEW.role = 'Admin' THEN
             -- user promoted to admin
-            FOR isAdminExists IN
-                SELECT 1 FROM groupMember WHERE gID = OLD.gID AND role = 'Admin'
             LOOP
-                INSERT INTO message (fromID, messageBody, toUserID, timeSent)
-                VALUES (adminID, CONCAT('User ', OLD.userID, ' has been promoted to Admin in ', groupName),
-                        (SELECT userID FROM groupMember WHERE gID = OLD.gID AND role = 'Admin' LIMIT 1), NOW());
-
-                -- notify the user of promotion
-                INSERT INTO message (fromID, messageBody, toUserID, timeSent)
-                VALUES (adminID, CONCAT('Congratulations! You have been promoted to Admin in ', groupName),
-                        OLD.userID, NOW());
+                generated_message_id := FLOOR(RANDOM() * 100000) + 1;
+                EXIT WHEN NOT EXISTS (SELECT * FROM message WHERE msgID = generated_message_id);
             END LOOP;
+
+            INSERT INTO message (msgID, fromID, messageBody, toGroupID, timeSent)
+            VALUES (generated_message_id, NEW.userID, CONCAT('User has been promoted to Admin in ', groupName), NEW.gid, NOW());
+
+            -- notify the user of promotion
+            LOOP
+                generated_message_id := FLOOR(RANDOM() * 100000) + 1;
+                EXIT WHEN NOT EXISTS (SELECT * FROM message WHERE msgID = generated_message_id);
+            END LOOP;
+
+            INSERT INTO message (msgID, fromID, messageBody, toGroupID, timeSent)
+            VALUES (generated_message_id, NEW.userid, CONCAT('Congratulations! You have been promoted to Admin in ', groupName), OLD.userID, NOW());
+            RETURN NEW;
+
         ELSIF OLD.role = 'Admin' AND NEW.role = 'Member' THEN
-            -- user demoted from admin to member
-            FOR isAdminExists IN
-                SELECT 1 FROM groupMember WHERE gID = OLD.gID AND role = 'Admin'
-            LOOP
-                INSERT INTO message (fromID, messageBody, toUserID, timeSent)
-                VALUES (adminID, CONCAT('Admin User ', OLD.userID, ' has been demoted to Member in ', groupName),
-                        (SELECT userID FROM groupMember WHERE gID = OLD.gID AND role = 'Admin' LIMIT 1), NOW());
+            IF OLD.userid <> adminID THEN
+                SELECT userID INTO adminID FROM groupMember WHERE gID = NEW.gID AND role = 'Admin' LIMIT 1;
+            end if;
 
-                -- notify the user of demotion
-                INSERT INTO message (fromID, messageBody, toUserID, timeSent)
-                VALUES (adminID, CONCAT('You have been demoted to Member in ', groupName),
-                        OLD.userID, NOW());
+            -- user demoted from admin to member
+            LOOP
+                generated_message_id := FLOOR(RANDOM() * 100000) + 1;
+                EXIT WHEN NOT EXISTS (SELECT * FROM message WHERE msgID = generated_message_id);
             END LOOP;
+
+            INSERT INTO message (msgID, fromID, messageBody, toGroupID, timeSent)
+            VALUES (generated_message_id, NEW.userid, CONCAT('Admin User ', OLD.userID, ' has been demoted to Member in ', groupName), NEW.gid, NOW());
+
+            -- notify the user of demotion
+            LOOP
+                generated_message_id := FLOOR(RANDOM() * 100000) + 1;
+                EXIT WHEN NOT EXISTS (SELECT * FROM message WHERE msgID = generated_message_id);
+            END LOOP;
+
+            INSERT INTO message (msgID, fromID, messageBody, toGroupID, timeSent)
+            VALUES (generated_message_id, NEW.userid, CONCAT('You have been demoted to Member in ', groupName), OLD.userID, NOW());
+            RETURN NEW;
         END IF;
     END IF;
     RETURN NEW;
-END;
+END
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER updateGroupTrigger
@@ -213,6 +204,8 @@ DECLARE
     adminID INTEGER;
     messageText VARCHAR(200);
     groupName VARCHAR(50);
+    msgID INTEGER;
+    generated_message_id INTEGER;
 BEGIN
     -- Get all admin IDs for the group
     SELECT userID INTO adminIDs
@@ -224,17 +217,22 @@ BEGIN
         -- Construct message text
         SELECT name INTO groupName FROM groupInfo WHERE gID = NEW.gID;
         messageText := 'A new member has requested to join group ' || groupName || '.';
-
-        -- Send message to all admins
+        -- Generate a random msgID and check if it already exists in the message table
+            LOOP
+                generated_message_id := FLOOR(RANDOM() * 100000) + 1;
+                EXIT WHEN NOT EXISTS (SELECT * FROM message WHERE msgID = generated_message_id);
+            END LOOP;
+        -- Send message to all admins with the generated msgID
         FOREACH adminID IN ARRAY adminIDs LOOP
-            INSERT INTO message (fromID, messageBody, toUserID, timeSent)
-            VALUES (NEW.userID, messageText, adminID, NOW());
+            INSERT INTO message (msgID, fromID, messageBody, toUserID, timeSent)
+            VALUES (msgID, NEW.userID, messageText, adminID, NOW());
         END LOOP;
     END IF;
 
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
 
 -- Create the trigger for the notifyGroupAdmins function
 CREATE TRIGGER pendingGroupMember_trigger

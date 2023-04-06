@@ -100,11 +100,14 @@ CREATE TABLE groupMember (
     userID INTEGER NOT NULL,
     role VARCHAR(20) NOT NULL,
     lastConfirmed TIMESTAMP,
-    --The Primary Key is a composite key on gID and userID which uniquely identifies a groupMember
-    PRIMARY KEY (gID, userID),
+
     --gID is a foreign key referencing gID in groupInfo table and userID is a foreign key referencing userID in profile table
     FOREIGN KEY (gID) REFERENCES groupInfo(gID),
     FOREIGN KEY (userID) REFERENCES profile(userID),
+
+    --The Primary Key is a composite key on gID and userID which uniquely identifies a groupMember
+    PRIMARY KEY (gID, userID),
+
     -- Structural Integrity Constraints
     -- Constraint to check if the role length is no more than 20 characters
     CONSTRAINT groupMember_role_length CHECK (LENGTH(role) <= 20),
@@ -115,17 +118,22 @@ CREATE TABLE groupMember (
 
 );
 
+
+
 -- Create the pendingGroupMember table
 CREATE TABLE pendingGroupMember (
     gID INTEGER NOT NULL,
     userID INTEGER NOT NULL,
     requestText VARCHAR(200),
     requestTime TIMESTAMP,
-    --The primary key is a composite key on gID and userID which uniquely identifies a pendingGroupMember
-    PRIMARY KEY (gID, userID),
+
     --gID is a foreign key referencing gID in groupInfo table and userID is a foreign key referencing userID in profile table
     FOREIGN KEY (gID) REFERENCES groupInfo(gID),
     FOREIGN KEY (userID) REFERENCES profile(userID),
+
+    --The primary key is a composite key on gID and userID which uniquely identifies a pendingGroupMember
+    PRIMARY KEY (gID, userID),
+
     -- Structural Integrity Constraints
     -- Constraint to check if the requestText length is no more than 200 characters
     CONSTRAINT pendingGroupMember_requestText_length CHECK (LENGTH(requestText) <= 200),
@@ -153,11 +161,7 @@ CREATE TABLE message (
 
     -- Semantic Integrity Constraints
     -- Constraint to check if at least one of toUserID and toGroupID is not null
-    CONSTRAINT message_toUserID_or_toGroupID CHECK (toUserID IS NOT NULL OR toGroupID IS NOT NULL),
-
-    -- Add a constraint to check that fromID and toUserID are not equal to each other,
-    -- which prevents users from sending friend messages to themselves and maintains the integrity of the data
-    CONSTRAINT pendingFriend_userID_not_equal CHECK (fromID <> toUserID)
+    CONSTRAINT message_toUserID_or_toGroupID CHECK (toUserID IS NOT NULL OR toGroupID IS NOT NULL)
 );
 
 -- Create the messageRecipient table
@@ -178,3 +182,6 @@ CREATE TABLE Clock (
 
 -- Insert the initial tuple in the Clock table
 INSERT INTO Clock VALUES (NOW());
+
+ALTER TABLE groupmember DROP CONSTRAINT IF EXISTS groupmember_pkey;
+ALTER TABLE groupmember ADD CONSTRAINT groupmember_pkey PRIMARY KEY (gID, userID);
