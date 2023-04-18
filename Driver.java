@@ -79,7 +79,34 @@ public class Driver {
                 String userEmail = kbd.next();
             }
             
-            
+            if(bottomLevel == 1)
+            {
+
+            }
+            if(bottomLevel == 2)
+            {
+                
+            }
+            if(bottomLevel == 3)
+            {
+                
+            }
+            if(bottomLevel == 4)
+            {
+                
+            }
+            if(bottomLevel == 5)
+            {
+                
+            }
+            if(bottomLevel == 6)
+            {
+                
+            }
+            if(bottomLevel == 7)
+            {
+                
+            }
             
         }
         
