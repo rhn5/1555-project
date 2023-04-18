@@ -1,3 +1,14 @@
+/**
+ * This class represents the main driver for the BeSocial application. It allows users to create profiles, login, and perform various actions such as initiating friendships, creating groups, and sending messages. 
+ * 
+ * The validateInputs method checks if the user input contains any SQL injection keywords such as "update", "delete", "select", or "drop". 
+ * 
+ * The main method initializes the BeSocial object and prompts the user to either create a profile, login, or exit. Once the user logs in, they can perform various actions by selecting a number corresponding to the desired action. 
+ * 
+ * @throws SQLException if there is an error with the SQL database
+ * @throws ClassNotFoundException if the class is not found
+ * @
+ */
 import java.util.*;
 import java.sql.*;
 import java.time.*;
@@ -58,7 +69,7 @@ public class Driver {
 
                 topLevel = kbd.nextInt();
                 System.out.println(topLevel);
-                while (topLevel <= 0) {
+                while (topLevel <= 0 || topLevel >= 5) {
                     System.out.println("PLEASE ENTER A VALID OPERATION:");
                     topLevel = Integer.parseInt(kbd.next());
                 }
@@ -73,7 +84,7 @@ public class Driver {
                 String userPass = kbd.next();
                 System.out.print("DOB: ");
                 String dob = kbd.next();
-
+                
                 topLevel = 0; // PUSH USER BACK TO TOP LEVEL MENU
 
             } else if (topLevel == 2 && userID.equals("")) // LOGIN
@@ -124,6 +135,11 @@ public class Driver {
                 System.out.println("17. logout");
                 System.out.print("Input:");
                 bottomLevel = kbd.nextInt();
+                if(!(bottomLevel > 1 && bottomLevel < 18))
+                {
+                    System.out.println("PLEASE ENTER A VALID OPERATION:");
+                    bottomLevel = Integer.parseInt(kbd.next());
+                }
             }
             if (bottomLevel == 1) {
 
