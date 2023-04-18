@@ -1,9 +1,13 @@
 import java.util.*;
+
+import javax.naming.spi.DirStateFactory.Result;
+
 import java.sql.*;
+import java.text.ParseException;
 import java.time.*;
 import java.lang.*;
 
-public class BeSocial{
+public class BeSocial {
 
     private Connection connection;
 	private Statement statement;
@@ -11,7 +15,7 @@ public class BeSocial{
 	private String username;
 	private String password;
 
-    public BeSocial(){
+    public BeSocial() {
         Scanner input = new Scanner(System.in);
         System.out.println("<-----LOG INTO DB----->");
         
@@ -44,95 +48,131 @@ public class BeSocial{
     }
 
     public int createProfile(String name, String email, String password, LocalDate dateOfBirth) {
-        String query = "INSERT INTO profiles (userID, name, email, password, dateOfBirth) " +
-                       "VALUES (?, ?, ?, ?, ?)";
+        String count = "SELECT COUNT(*) FROM profiles";
+        ResultSet rs = statement.executeQuery(count);
+        rs.next();
+        int userId = rs.getInt(1);
+        System.out.println(userId);
+
+        String query = "INSERT INTO profiles (userID, name, email, password, dateOfBirth) " + "VALUES (?, ?, ?, ?, ?)";
+        PreparedStatement st;
+        try{
+            st = connection.prepareStatement(query);
+        }
+        catch(SQLException s){
+            System.out.println();
+        }
+        
+        Date sql_date = new Date (dateOfbirth.getYear() ,dateOfbirth.getMonth(), dateOfbirth.getDay())
+        
+
+        
+        st.setInt(1, userId);
+        st.setString(2, name);
+        st.setString(3, email);
+        st.setString(4, password);
+        st.setDate(5, dateOfBirth.toString());
+
+        rs = st.executeQuery();
+        if(rs.next()){
+            return 1;
+        }
+        else{
+            System.out.println();
+            return -1;
+        }
+    }
+
+    public int dropProfile(String email) {
         return 1;
     }
 
-    public int dropProfile(String email)
-    {
+    public int login(String email, String password) {
+        String query = "SELECT * FROM profiles WHERE email=? AND password=?";
+        PreparedStatement st;// = connection.prepareStatement(query);
+        try{
+            st = connection.prepareStatement(query);
+        }
+        catch(SQLException s){
+            System.out.println();
+        }
+
+        st.setString(1,email);
+        st.setString(2,password);
+
         return 1;
     }
 
-    public int login(String email, String password)
-    {
+    public int initiateFriendship(String userID) {
         return 1;
     }
 
-    public int initiateFriendship(String userID)
-    {
+    public int confirmFriendRequests() {
         return 1;
     }
 
-    public int confirmFriendRequests()
-    {
+    public int createGroup() {
         return 1;
     }
 
-    public int createGroup()
-    {
-        return 1;
-    }
-    public int initiateAddingGroup()
-    {
-        return 1;
-    }
-    public int confirmGroupMembership()
-    {
-        return 1;
-    }
-    public int leaveGroup()
-    {
+    public int initiateAddingGroup() {
         return 1;
     }
 
-    public int searchForProfile()
-    {
+    public int confirmGroupMembership() {
         return 1;
     }
-    public int sendMessageToUser()
-    {
+
+    public int leaveGroup() {
         return 1;
     }
-    public int sendMessageToGroup()
-    {
+
+    public int searchForProfile() {
         return 1;
     }
-    public int displayMessages()
-    {
+
+    public int sendMessageToUser() {
         return 1;
     }
-    public int displayNewMessages()
-    {
+
+    public int sendMessageToGroup() {
         return 1;
     }
-    public int displayFriends()
-    {
+
+    public int displayMessages() {
         return 1;
     }
-    public int rankGroups()
-    {
+
+    public int displayNewMessages() {
         return 1;
     }
-    public int rankProfiles()
-    {
+
+    public int displayFriends() {
         return 1;
     }
-    public int topMessages()
-    {
+
+    public int rankGroups() {
         return 1;
     }
-    public int threeDegrees()
-    {
+
+    public int rankProfiles() {
         return 1;
     }
-    public int logout()
-    {
+
+    public int topMessages() {
         return 1;
     }
-    public int exit()
-    {
+
+    public int threeDegrees() {
         return 1;
     }
-    
+
+    public int logout() {
+        return 1;
+    }
+
+    public int exit() {
+        return 1;
+    }
+
 }
