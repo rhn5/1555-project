@@ -10,11 +10,10 @@ import java.lang.*;
 public class BeSocial {
 
     private Connection connection;
-    private Properties properties;
-    private Statement statement;
-    private String url = "jdbc:postgresql://localhost:5432/";
-    private String username;
-    private String password;
+	private Statement statement;
+	private String url;
+	private String username;
+	private String password;
 
     public BeSocial() {
         Scanner input = new Scanner(System.in);
@@ -46,7 +45,6 @@ public class BeSocial {
         catch(Exception e){
             e.printStackTrace();
         }
-
     }
 
     public int createProfile(String name, String email, String password, LocalDate dateOfBirth) {
