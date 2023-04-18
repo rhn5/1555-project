@@ -2,8 +2,9 @@ import java.util.*;
 import java.sql.*;
 import java.time.*;
 import java.lang.*;
-
-
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
 public class Driver {
     
@@ -18,7 +19,7 @@ public class Driver {
 		return result;
 	}
 
-    public static void main(String[] args) throws SQLException, ClassNotFoundException {
+    public static void main(String[] args) throws SQLException, ClassNotFoundException, IOException {
         BeSocial beSocial = new BeSocial();
         Scanner kbd = new Scanner(System.in);
         ArrayList<String> validate = new ArrayList<String>();
@@ -26,7 +27,22 @@ public class Driver {
         Boolean exit = false;
         int topLevel = 0;
         int bottomLevel = 0;
-        String userID = null;
+        String userID = "";
+        
+        try
+        {
+            BufferedReader logo = new BufferedReader(new FileReader("logo.txt"));
+            while(logo.ready())
+            {
+                System.out.println(logo.readLine());
+            }
+        }
+        catch(Exception e)
+        {
+
+        }
+
+        
         while(!exit)
         {
             /**
@@ -63,7 +79,7 @@ public class Driver {
                 topLevel = 0; //PUSH USER BACK TO TOP LEVEL MENU
 
             }
-            else if(topLevel == 2 && bottomLevel == 0) //LOGIN
+            else if(topLevel == 2 && !userID.equals("")) //LOGIN
             {
                 System.out.println("<-----CREATE PROFILE----->");
                 System.out.print("Email: ");
@@ -71,6 +87,7 @@ public class Driver {
                 System.out.print("Password: ");
                 String userPass = kbd.next();
                 //LOG IN USER AND SET USERID TO USERID
+                
             }
             else if(topLevel == 3 && bottomLevel == 0)
             {
@@ -78,7 +95,27 @@ public class Driver {
                 System.out.print("Email: ");
                 String userEmail = kbd.next();
             }
-            
+            if(!userID.equals(""))
+            {
+                System.out.println("<-----BeSocial----->");
+                System.out.println("1. initiateFriendship");
+                System.out.println("2. confirmFriendRequests");
+                System.out.println("3. createGroup");
+                System.out.println("4. initiateAddingGroup");
+                System.out.println("5. confirmGroupMembership");
+                System.out.println("6. leaveGroup");
+                System.out.println("7. searchForProfile");
+                System.out.println("8. sendMessageToUser");
+                System.out.println("9. sendMessageToGroup");
+                System.out.println("10. displayMessages");
+                System.out.println("11. displayNewMessages");
+                System.out.println("12. displayFriends");
+                System.out.println("13. rankGroups");
+                System.out.println("14. rankProfiles");
+                System.out.println("15. topMessages");
+                System.out.println("16. threeDegrees");
+                System.out.print("Input:");
+            }
             if(bottomLevel == 1)
             {
 
