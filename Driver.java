@@ -42,6 +42,7 @@ public class Driver {
 
         }
 
+        System.out.println();
         
         while(!exit)
         {
@@ -57,7 +58,8 @@ public class Driver {
                 System.out.println("3. Delete Profile");
                 System.out.print("Input:");
 
-                topLevel = Integer.parseInt(kbd.next());
+                topLevel = kbd.nextInt();
+                System.out.println(topLevel);
                 while(topLevel <= 0)
                 {
                     System.out.println("PLEASE ENTER A VALID OPERATION:");
@@ -87,7 +89,7 @@ public class Driver {
                 System.out.print("Password: ");
                 String userPass = kbd.next();
                 //LOG IN USER AND SET USERID TO USERID
-                
+                userID = "1";
             }
             else if(topLevel == 3 && bottomLevel == 0)
             {
