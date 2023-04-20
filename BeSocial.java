@@ -11,7 +11,7 @@ public class BeSocial {
     private String username;
     private String password;
     private Scanner scan = new Scanner(System.in);
-    private int userID; 
+    private int userID;
 
     public BeSocial() {
         Scanner input = new Scanner(System.in);
@@ -68,15 +68,12 @@ public class BeSocial {
         st.setString(4, password);
         st.setDate(5, dateOfBirth);
         st.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
-        try{
+        try {
             st.executeUpdate();
             return 1;
-        }
-        catch(SQLException e)
-        {
+        } catch (SQLException e) {
             return -1;
         }
-        
 
     }
 
@@ -99,127 +96,119 @@ public class BeSocial {
         }
     }
 
-    
-
     public int dropProfile() {
 
         return 1;
     }
 
     public int initiateFriendship(int friendID) {
-        //use select to get name and info from frined ID
-        String select = "SELECT name FROM profile WHERE userID="+ friendID;
-        String friendName= "";
-        try{
-            Statement st =  connection.createStatement();
+        // use select to get name and info from frined ID
+        String select = "SELECT name FROM profile WHERE userID=" + friendID;
+        String friendName = "";
+        try {
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(select);
-            
-            if(rs.next()){
+
+            if (rs.next()) {
                 friendName = rs.getString("name");
             }
-        }
-        catch(SQLException s){
+        } catch (SQLException s) {
 
         }
-        System.out.println("Sending request to "+ friendName);
+        System.out.println("Sending request to " + friendName);
         System.out.print("Type in message you would like to send ");
-        String text = scan.nextLine();            
+        String text = scan.nextLine();
 
-        //scanner to get confirmation from user
+        // scanner to get confirmation from user
         System.out.println("Are you sure you want to send a friend request to " + friendName + " type yes or no: ");
         String confirmation = scan.next();
-        if(confirmation.equals("yes")){
+        if (confirmation.equals("yes")) {
             String insert = "INSERT INTO pendingFriend(fromID, toID, requestText) " + "VALUES(?, ?, ?)";
-        
-            try{
+
+            try {
                 PreparedStatement pst = connection.prepareStatement(insert);
                 pst.setInt(1, userID);
                 pst.setInt(2, friendID);
                 pst.setString(3, text);
                 pst.executeUpdate();
-                
 
-            }
-            catch(SQLException s){
+            } catch (SQLException s) {
                 System.out.println("error adding into db ");
             }
             return 1;
-        }
-        else{
+        } else {
             return -1;
         }
 
     }
 
     public int confirmFriendRequests() {
-        
+
         return 1;
     }
 
-        
+    public int createGroup() {
+        return 1;
+    }
 
-        public int createGroup() {
-            return 1;
-        }
+    public int initiateAddingGroup() {
+        return 1;
+    }
 
-        public int initiateAddingGroup() {
-            return 1;
-        }
+    public int confirmGroupMembership() {
+        return 1;
+    }
 
-        public int confirmGroupMembership() {
-            return 1;
-        }
+    public int leaveGroup() {
+        return 1;
+    }
 
-        public int leaveGroup() {
-            return 1;
-        }
+    public int searchForProfile() {
+        return 1;
+    }
 
-        public int searchForProfile() {
-            return 1;
-        }
+    public int sendMessageToUser() {
+        return 1;
+    }
 
-        public int sendMessageToUser() {
-            return 1;
-        }
+    public int sendMessageToGroup() {
+        return 1;
+    }
 
-        public int sendMessageToGroup() {
-            return 1;
-        }
+    public int displayMessages() {
+        return 1;
+    }
 
-        public int displayMessages() {
-            return 1;
-        }
+    public int displayNewMessages() {
+        return 1;
+    }
 
-        public int displayNewMessages() {
-            return 1;
-        }
+    public int displayFriends() {
+        return 1;
+    }
 
-        public int displayFriends() {
-            return 1;
-        }
+    public int rankGroups() {
+        return 1;
+    }
 
-        public int rankGroups() {
-            return 1;
-        }
+    public int rankProfiles() {
+        return 1;
+    }
 
-        public int rankProfiles() {
-            return 1;
-        }
+    public int topMessages() {
+        return 1;
+    }
 
-        public int topMessages() {
-            return 1;
-        }
+    public int threeDegrees() {
+        return 1;
+    }
 
-        public int threeDegrees() {
-            return 1;
-        }
+    public int logout() {
+        return 1;
+    }
 
-        public int logout() {
-            return 1;
-        }
+    public int exit() {
+        return 1;
+    }
 
-        public int exit() {
-            return 1;
-        }
-    
 }
