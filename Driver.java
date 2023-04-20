@@ -34,6 +34,79 @@ public class Driver {
         }
         return result;
     }
+    public static void main(String[] args) throws SQLException, ClassNotFoundException, IOException {
+        BeSocial driver = new BeSocial();
+
+        //drop the profile for driver@gmail.com if it already exists. If not, fails
+        driver.dropProfile("driver@gmail.com");
+
+        //creating user profile for driver@gmail.com
+        driver.createProfile("test","driver@gmail.com" , "Datadata123", Date.valueOf("2000-1-1"));
+        //showing that if run again it fails
+        driver.createProfile("test","driver@gmail.com" , "Datadata123", Date.valueOf("2000-1-1"));
+
+        //drop the profile for driver@gmail.com, should be successful
+        driver.dropProfile("driver@gmail.com");
+
+        //creating user profile for driver@gmail.com again
+        driver.createProfile("test","driver@gmail.com" , "Datadata123", Date.valueOf("2000-1-1"));
+
+        //login the driver
+        driver.login("driver@gmail.com", "Datadata123");
+
+        //send friend request to userID 10
+        driver.initiateFriendship(10);
+
+        //Group Creation
+        driver.createGroup("driverGroup", "Driver Group", 10);
+
+        //User request to join groupID = 1
+        driver.initiateAddingGroup(1, "You have been invited to join the group");
+
+        //Driver leaves driverGroup
+        driver.leaveGroup("driverGroup");
+
+        //testing search Profile
+        driver.searchForProfile("a");
+
+        //sending a message
+        String message = "Ping";
+        driver.sendMessageToUser("NishaParmar@gmail.com", message);
+        driver.sendMessageToUser("NishaParmar@gmail.com", message);
+        driver.sendMessageToUser("NishaParmar@gmail.com", message);
+        driver.sendMessageToUser("NishaParmar@gmail.com", message);
+        driver.sendMessageToUser("NishaParmar@gmail.com", message);
+
+        //Group Creation
+        driver.createGroup("driverGroup2", "Driver Group2", 10);
+        
+        //Testing message to group
+        driver.sendMessageToGroup("driverGroup2");
+
+        //Display Messages
+        driver.displayMessages();
+
+        //Display New Messages
+        driver.displayNewMessages();
+
+        //Test Rank Groups
+        driver.rankGroups();
+
+        //Test Rank Profiles
+        driver.rankProfiles();
+
+        //Testing top Messages
+        driver.topMessages();
+
+        //Test Three Degrees
+        driver.threeDegrees();
+
+        //Test Logout
+        driver.logout();
+
+        //Test Application exit
+        driver.exit();
+    }
 
     
 }

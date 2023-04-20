@@ -236,7 +236,12 @@ public class BeSocial {
 
             }
             if (bottomLevel == 8) {
-
+                System.out.println("<-----SEND MESSAGE----->");
+                System.out.println("Sending Message To (email): ");
+                String toUser = kbd.next();
+                System.out.println("Message: ");
+                String message = kbd.next();
+                beSocial.sendMessageToUser(toUser,message);
             }
             if (bottomLevel == 9) {
 
@@ -373,7 +378,7 @@ public class BeSocial {
         }
     }
 
-    public int dropProfile() {
+    public int dropProfile(String email) {
 
         return 1;
     }
@@ -753,24 +758,19 @@ public class BeSocial {
         return 1;
     }
 
-    public int sendMessageToUser(String toUserEmail) {
-        Scanner choices = new Scanner(System.in);
+    public int sendMessageToUser(String toUserEmail, String msgBody) {
+            
             try {
                 PreparedStatement message = connection.prepareStatement("INSERT INTO message VALUES(?, ?, ?, ?, ?, ?)");
                 String userName = getNameByEmail(toUserEmail);
                 int toID = getUserIDByEmail(toUserEmail);
                 int msgID;
-                String msgBody;
                 do {
                     msgID = (int) Math.random();
                 }
                 while (connection.prepareStatement("SELECT COUNT(*) FROM message WHERE msgID = %s", msgID)
                         .executeQuery().getInt(1) == 0);
-                do {
-                    System.out.println("Sending Message To: " + userName);
-                    System.out.printf("Enter Message [Max 200 chars and can't be blank] -> ");
-                    msgBody = choices.next();
-                } while (msgBody.length() > 200 || msgBody.isBlank());
+                
                 message.setInt(1, msgID);
                 message.setInt(2, userID);
                 message.setString(3, msgBody);
