@@ -239,19 +239,31 @@ public class BeSocial {
                 }
             }
             if (bottomLevel == 5) {
-                
+                int success = beSocial.confirmGroupMembership(-1);
+                if(success == -1)
+                {
+                    System.out.println("<-----GROUP CONFIRMATION FAILED----->");
+                }
             }
             if (bottomLevel == 6) {
                 System.out.println("<-----LEAVE GROUP----->");
                 System.out.println("Enter group name:");
                 String groupName = kbd.next();
-                beSocial.leaveGroup(groupName);
+                int success = beSocial.leaveGroup(groupName);
+                if(success == -1)
+                {
+                    System.out.println("<-----GROUP LEAVE FAILED----->");
+                }
             }
             if (bottomLevel == 7) {
                 System.out.println("Enter name to search: ");
                 kbd.nextLine();
                 String name = kbd.nextLine();
-                beSocial.searchForProfile(name);
+                int success = beSocial.searchForProfile(name);
+                if(success == -1)
+                {
+                    System.out.println("<-----PROFILE SEARCH FAILED----->");
+                }
             }
             if (bottomLevel == 8) {
                 System.out.println("<-----SEND MESSAGE----->");
@@ -259,23 +271,36 @@ public class BeSocial {
                 String toUser = kbd.next();
                 System.out.println("Message: ");
                 String message = kbd.next();
-                beSocial.sendMessageToUser(toUser,message);
+                int success = beSocial.sendMessageToUser(toUser,message);
+                if(success == -1)
+                {
+                    System.out.println("<-----MESSAGE SEND FAILED----->");
+                }
             }
             if (bottomLevel == 9) {
                 System.out.println("Enter group name");
                 String groupName = kbd.next();
-                beSocial.sendMessageToGroup(groupName);
+                int success = beSocial.sendMessageToGroup(groupName);
+                if(success == -1)
+                {
+                    System.out.println("<-----MESSAGE SEND FAILED----->");
+                }
             }
             if (bottomLevel == 10) { 
-                beSocial.displayMessages();
+                int success = beSocial.displayMessages();
+                if(success == -1)
+                {
+                    System.out.println("<-----MESSAGE DISPLAY FAILED----->");
+                }
             }
             if (bottomLevel == 11) {   
-                beSocial.displayNewMessages();
+                int success = beSocial.displayNewMessages();
+                if(success == -1)
+                {
+                    System.out.println("<-----MESSAGE DISPLAY FAILED----->");
+                }
             }
-            if (bottomLevel == 12) {//issue
-
-
-                
+            if (bottomLevel == 12) {                
                 beSocial.displayFriends();
             }
             if (bottomLevel == 13) {
@@ -290,13 +315,21 @@ public class BeSocial {
             if (bottomLevel == 16) {
                 System.out.println("Enter user ID to find three degrees:");
                 int id= kbd.nextInt();
-                beSocial.threeDegrees(id);
+                int success = beSocial.threeDegrees(id);
+                if(success == -1)
+                {
+                    System.out.println("<-----THIRD DEGREE FIND FAILED----->");
+                }
             }
             if(bottomLevel == 17 ){
                 loggedIn = -1;
                 topLevel = 0;
                 bottomLevel = 0;
-                beSocial.logout();
+                int success = beSocial.logout();
+                if(success == -1)
+                {
+                    System.out.println("<-----LOGOUT FAILED----->");
+                }
             }
             
             
