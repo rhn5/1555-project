@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
+import java.util.Hashtable;
 
 public class BeSocial {
 
@@ -305,6 +306,8 @@ public class BeSocial {
             if(rs.next()){
                 clockTime = rs.getTimestamp("pseudotime");
             }
+            clockSt.close();
+            rs.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -315,7 +318,7 @@ public class BeSocial {
         String count = "SELECT COUNT(*) FROM profile";
         Statement countStatement = connection.createStatement();
         ResultSet rs = countStatement.executeQuery(count);
-
+        PreparedStatement st = null;
         int id = -1;
         if (rs.next()) {
             id = rs.getInt("count") ;
@@ -324,7 +327,7 @@ public class BeSocial {
         String query = "INSERT INTO profile (userID, name, email, password, dateOfBirth, lastLogin) "
                 + "VALUES (?, ?, ?, ?, ?, ?)";
         try {
-            PreparedStatement st = connection.prepareStatement(query);
+            st = connection.prepareStatement(query);
 
             st.setInt(1, id);
             st.setString(2, name);
@@ -336,6 +339,13 @@ public class BeSocial {
         } catch (SQLException s) {
             System.out.println("error adding new profile into database ");
             return -1;
+        }
+        finally{
+            if(st != null){
+                st.close();
+            }    
+            rs.close();
+
         }
 
         return 1;
@@ -353,9 +363,12 @@ public class BeSocial {
             String rname = rs.getString("name");
             System.out.println("Welcome " + rname + " to BeSocial");
             userID = rs.getInt(("userID"));
-
+            st.close();
+            rs.close();
             return 1;
         } else {
+            st.close();
+            rs.close();
             return -1;
         }
     }
@@ -376,6 +389,9 @@ public class BeSocial {
             if (rs.next()) {
                 friendName = rs.getString("name");
             }
+
+            rs.close();
+            st.close();
         } catch (SQLException s) {
             return -1;
         }
@@ -395,6 +411,8 @@ public class BeSocial {
                 pst.setInt(2, friendID);
                 pst.setString(3, text);
                 pst.executeUpdate();
+
+                pst.close();
 
             } catch (SQLException s) {
                 System.out.println(s);
@@ -427,6 +445,8 @@ public class BeSocial {
                 System.out.println(count + ". User id " + friendID + " said " + text);
                 count++;
             }
+            st.close();
+            rs.close();
         } catch (SQLException s) {
             System.out.println("NO pending Friend REquest :(");
             return -1;
@@ -435,11 +455,11 @@ public class BeSocial {
         System.out.println("Type in the line number that you want to add as a friend or type in all to accept all");
         String result = scan.next();
         if (result.equals("all")) {
-
+            PreparedStatement st = null;
             String insert = "INSERT INTO friend(userID1, userID2, JDate, requestText) " + "Values(?, ? , ? , ?)";
             for(int i = 0; i < fromIDList.size(); i++){            
                 try{
-                    PreparedStatement st = connection.prepareStatement(insert);
+                    st = connection.prepareStatement(insert);
                     st.setInt(1, userID);
                     st.setInt(2, fromIDList.get(i));
                     st.setTimestamp(3,clockTime);
@@ -450,14 +470,23 @@ public class BeSocial {
                     System.out.println();
                 }
             }
-                String delete = "DELETE FROM pendingFriend where toID = " + userID;
+            if(st != null){
                 try{
-                    Statement st = connection.createStatement();
-                    int rowsDeleted = st.executeUpdate(delete);
+                    st.close();
                 }
                 catch(SQLException s){
-                    return -1;
+                    System.out.println("error closing statement");
                 }
+            }
+            String delete = "DELETE FROM pendingFriend where toID = " + userID;
+            try{
+                Statement deleteST = connection.createStatement();
+                int rowsDeleted = deleteST.executeUpdate(delete);
+                deleteST.close();
+            }
+            catch(SQLException s){
+                return -1;
+            }
                 
         } else {
             int tempID = fromIDList.get(Integer.parseInt(result));
@@ -549,48 +578,372 @@ public class BeSocial {
     }
 
     public int confirmGroupMembership() {
-        
-        return 1;
-    }
+        //display formatted numbered list of all pending group member where user is group m
+        //user shoud be prompted for a num of request they would liek to confirm, 1 at time, or all
+        //move selectd requests to pending group member relation to groupmember using urrent time
+        //if accepting pending group member would exceed group's size accepted requet should remain in pending
+        //remaining requets which were not selected are declined and removed from pending
+        //no pending group member request for any groups that the user is a manager of, 
+        //message of no groups are curr managerd should be displated
+        //no groups are currently managed if user is not a manager. 
 
-    public int leaveGroup() {
-        return 1;
-    }
-
-    public int searchForProfile() {
-        return 1;
-    }
-
-    public int sendMessageToUser() {
-        return 1;
-    }
-
-    public int sendMessageToGroup() {
-        return 1;
-    }
-
-    public int displayMessages() {
-        String select = "SELECT * from message where toID = " + userID;
+        //find out if user is a manager
+        String query = "SELECT gID FROM groupMember WHERE role = 'manager' userID=" + userID;
+        int gID = 0;
+        ArrayList<Integer> gidList= new ArrayList<>();
+        ArrayList<Integer> sizeList = new ArrayList<>();
+        ArrayList<String> textList = new ArrayList<>();
+        ArrayList<Integer> uidList = new ArrayList<>();
+        Hashtable<Integer,Integer> groupSize = new Hashtable<>();
         try{
             Statement st = connection.createStatement();
-            ResultSet rs = st.executeQuery(select);
-            if(rs.next()){
-                
+            ResultSet rs = st.executeQuery(query);
+            while(rs.next()){
+                gID = rs.getInt("gID");
+                gidList.add(gID);//list of groups that user is a manager in
             }
         }
         catch(SQLException s){
             return -1;
         }
+        for (int i = 0; i < gidList.size(); i ++){
+            query = "SELECT size FROM groupInfo WHERE gID = " + gidList.get(i);
+            Statement st = null;//connection.createStatement();
+            ResultSet rs = null;//st.executeQuery(query);
+            try{
+                st = connection.createStatement();
+                rs = st.executeQuery(query);
+                if(rs.next()){
+                    //sizeList.add(rs.getInt("size"));
+                    groupSize.put(gidList.get(i), rs.getInt("size"));
+                }
+            }
+            catch(SQLException s){
+
+            }
+            finally{
+                if(st != null){
+                    try{
+                        st.close();
+                    }
+                    catch(SQLException s){
+                        System.out.println("error closing st");
+                    }
+                }
+                if(rs != null){
+                    try{
+                        rs.close();
+                    }
+                    catch(SQLException s){
+                        System.out.println("error closing rs");
+                    }
+                }
+            }
+            
+        }
+        if(gidList.isEmpty()){
+            System.out.println("User is not a manager in any groups");
+            return 1;
+        }
+        for(int i = 0 ; i < gidList.size(); i ++){
+            query = "SELECT requestText, userID FROM pendingGroupMember WHERE gID = " + gidList.get(i);
+            try{
+                Statement st = connection.createStatement();
+                ResultSet rs = st.executeQuery(query);
+                while(rs.next()){
+                    textList.add(rs.getString("requestText"));
+                    uidList.add(rs.getInt("userID"));
+                }
+            }
+            catch(SQLException s){
+                System.out.println();
+            }
+        }
+        if(uidList.isEmpty()){
+            System.out.println("NO pending requests ");
+            return 1;
+        }
+        for(int i = 1; i < textList.size() + 1; i++){
+            System.out.println(i + " UserID: " + uidList.get(i-1) + " Request: " + textList.get(i));
+        }
+        //displayed now pick which one
+        System.out.println("Type in the line number that you want to accept or type all to accept all");
+        String result = scan.next();
+        if(result.equals("all")){
+            String insert = "INSERT INTO ";
+        }
+
+        //look for count of requests where user is man, if none display message
+        
         return 1;
+    }
+
+    public int leaveGroup(String groupName) {
+        int groupID = getGroupIDByName(groupName);
+            try {
+                PreparedStatement deleteGMemberStatement = connection
+                        .prepareStatement("DELETE FROM groupMember WHERE userID = ? AND gID = ?");
+                deleteGMemberStatement.setInt(1, userID);
+                deleteGMemberStatement.setInt(2, groupID);
+                deleteGMemberStatement.executeQuery();
+                System.out.println("Successfully Left Group: " + groupName);
+            } catch (SQLException e) {
+                System.out.println("Error Leaving Group Please Try Again");
+                return -1;
+            }
+        return 1;
+    }
+
+    public int searchForProfile(String searchWord) {
+        
+        String [] words = searchWord.split(" ");
+        System.out.println(words.length);
+        String query = "";
+        PreparedStatement st = null;
+        int c = 1;
+        for(int i = 0; i < words.length; i ++){
+            query += "SELECT * FROM profile WHERE name LIKE ?" + " OR email LIKE ?";
+            try{
+                st = connection.prepareStatement(query);
+                System.out.println("%"+words[i]+"%");
+                st.setString(c, "%"+words[i]+"%");
+                c++;
+                st.setString(c, "%"+words[i]+"%");
+                c++;
+            }
+            catch(SQLException s){
+                System.out.println("error");
+            }
+            if(i != words.length -1){
+                query = query + " UNION ";
+            }
+        }
+        System.out.println(query);
+        //ResultSet rs = null;
+        try{
+
+            ResultSet rs = st.executeQuery(query);
+            int count = 0;
+            while(rs.next()){
+                int id = rs.getInt("userID");
+                String name = rs.getString("name");
+                String email = rs.getString("email");
+                System.out.println(count +" name = " + name + " email = " + "id = " + userID); 
+                count++;
+            }
+        }
+        catch(SQLException s){
+            System.out.println("error executing query");
+            System.out.println("Error message: " + s.getMessage());
+            System.out.println("SQL state: " + s.getSQLState());
+            System.out.println("Error code: " + s.getErrorCode());
+            return -1;
+        }
+        finally{
+            
+            if(st != null){
+                try{
+                    st.close();
+                }
+                catch(SQLException s){
+                    System.out.println("error closing statement");
+                }
+            }
+        }
+        return 1;
+    }
+
+    public int sendMessageToUser(String toUserEmail) {
+        Scanner choices = new Scanner(System.in);
+            try {
+                PreparedStatement message = connection.prepareStatement("INSERT INTO message VALUES(?, ?, ?, ?, ?, ?)");
+                String userName = getNameByEmail(toUserEmail);
+                int toID = getUserIDByEmail(toUserEmail);
+                int msgID;
+                String msgBody;
+                do {
+                    msgID = (int) Math.random();
+                }
+                while (connection.prepareStatement("SELECT COUNT(*) FROM message WHERE msgID = %s", msgID)
+                        .executeQuery().getInt(1) == 0);
+                do {
+                    System.out.println("Sending Message To: " + userName);
+                    System.out.printf("Enter Message [Max 200 chars and can't be blank] -> ");
+                    msgBody = choices.next();
+                } while (msgBody.length() > 200 || msgBody.isBlank());
+                message.setInt(1, msgID);
+                message.setInt(2, userID);
+                message.setString(3, msgBody);
+                message.setInt(4, toID);
+                message.setNull(5, Types.NULL);
+                message.setTimestamp(6, Timestamp.from(java.time.Instant.now()));
+                message.executeQuery();
+            } catch (SQLException e) {
+                System.out.println("Error Sending Message");
+                return -1;
+            }
+            return 1;
+    }
+
+    public int sendMessageToGroup(String toGroupName) {
+        Scanner choices = new Scanner(System.in);
+        try {
+            PreparedStatement message = connection.prepareStatement("INSERT INTO message VALUES(?, ?, ?, ?, ?, ?)");
+            int groupID = getGroupIDByName(toGroupName);
+            int msgID;
+            String msgBody;
+            do {
+                msgID = (int) Math.random();
+            }
+            while (connection.prepareStatement("SELECT COUNT(*) FROM message WHERE msgID = %s", msgID)
+                    .executeQuery().getInt(1) == 0);
+            do {
+                System.out.println("Sending Message To: " + toGroupName + " GroupID: " + groupID);
+                System.out.printf("Enter Message [Max 200 chars and can't be blank] -> ");
+                msgBody = choices.next();
+            } while (msgBody.length() > 200 || msgBody.isBlank());
+            message.setInt(1, msgID);
+            message.setInt(2, userID);
+            message.setString(3, msgBody);
+            message.setNull(4, Types.NULL);
+            message.setInt(5, groupID);
+            message.setTimestamp(6, Timestamp.from(java.time.Instant.now()));
+            message.executeQuery();
+        } catch (SQLException e) {
+            System.out.println("Error Sending Message");
+            return -1;
+        }    
+        return 1;
+    }
+
+    public int displayMessages() {
+        // Create a statement to retrieve all messages sent to the user
+        try {
+            PreparedStatement stmt = connection.prepareStatement("SELECT * FROM message WHERE toUserID = ?");
+            stmt.setInt(1, userID);
+            ResultSet rs = stmt.executeQuery();
+
+            // Loop through the result set and format each message for display
+            while (rs.next()) {
+                int msgID = rs.getInt("msgID");
+                int fromID = rs.getInt("fromID");
+                int groupIDMaybe = rs.getInt("toGroupID");
+                Timestamp timestamp = rs.getTimestamp("timeSent");
+                String formattedTimestamp = timestamp.toLocalDateTime().toString();
+                String message = rs.getString("messageBody");
+
+                System.out.printf("[%15s]\n", String.format("Message ID: %s", msgID));
+                System.out.printf("[%25s]\n", String.format("From User: %s", getNameByUserID(fromID)));
+                System.out.printf("[%20s]\n", String.format("Time Sent: %s", formattedTimestamp));
+                if (groupIDMaybe != 0) System.out.printf("[%20s]\n", String.format("Sent To Group: %s", getGroupNameByID(groupIDMaybe)));
+                System.out.printf("[%230s]\n", String.format("%30s sent: \n %200s", getNameByUserID(fromID), message));
+            }
+
+            // Print the footer for the message list
+            System.out.println("------------------------------------------------------------------------------------");
+            System.out.println("Total messages: " + rs.getRow());
+
+            // Return the number of messages displayed
+            return rs.getRow();
+        } catch(SQLException e) {
+            e.printStackTrace();
+            return -1;
+        }
         
     }
 
     public int displayNewMessages() {
-        return 1;
+        Timestamp lastLogin = Timestamp.valueOf(userAttributes.get("lastLogin").toString());
+            try {
+                PreparedStatement stmt = connection.prepareStatement("SELECT * FROM message WHERE toUserID = ?" +
+                        "AND timeSent > ?");
+
+                stmt.setInt(1, userID);
+                stmt.setTimestamp(2, lastLogin);
+                ResultSet rs = stmt.executeQuery();
+
+                // Loop through the result set and format each message for display
+                while (rs.next()) {
+                    int msgID = rs.getInt("msgID");
+                    int fromID = rs.getInt("fromID");
+                    int groupIDMaybe = rs.getInt("toGroupID");
+                    Timestamp timestamp = rs.getTimestamp("timeSent");
+                    String formattedTimestamp = timestamp.toLocalDateTime().toString();
+                    String message = rs.getString("messageBody");
+
+                    System.out.printf("[%15s]\n", String.format("Message ID: %s", msgID));
+                    System.out.printf("[%25s]\n", String.format("From User: %s", getNameByUserID(fromID)));
+                    System.out.printf("[%20s]\n", String.format("Time Sent: %s", formattedTimestamp));
+                    if (groupIDMaybe != 0) System.out.printf("[%20s]\n", String.format("Sent To Group: %s", getGroupNameByID(groupIDMaybe)));
+                    System.out.printf("[%230s]\n", String.format("%30s sent: \n %200s", getNameByUserID(fromID), message));
+                }
+
+                // Print the footer for the message list
+                System.out.println("------------------------------------------------------------------------------------");
+                System.out.println("Total messages: " + rs.getRow());
+
+                // Return the number of messages displayed
+                return rs.getRow();
+            } catch(SQLException e) {
+                e.printStackTrace();
+                return -1;
+            }
     }
 
     public int displayFriends() {
-        return 1;
+        Scanner choices = new Scanner(System.in);
+            boolean done = false;
+
+            while (!done) {
+                // Display the list of user's friends
+                System.out.println("Your friends:");;
+                try {
+                    PreparedStatement stmt = connection.prepareStatement(
+                            "SELECT userID, name FROM profile WHERE userID IN (WHERE userID1 = ? OR userID2 = ?)"
+                    );
+                    stmt.setInt(1, userID);
+                    stmt.setInt(2, userID);
+                    ResultSet rs = stmt.executeQuery();
+
+                    while (rs.next()) {
+                        int friendID = rs.getInt("userID");
+                        String name = rs.getString("name");
+                        System.out.printf("%d. %s (userID=%d)\n", rs.getRow(), name, friendID);
+                    }
+                    System.out.println("0. Back to main menu");
+                } catch (SQLException e) {
+                    System.out.println("Error: " + e.getMessage());
+                    return -1;
+                }
+
+                // Ask the user to select a friend or go back
+                System.out.print("Enter friend's userID (or 0 to go back): ");
+                int friendID = choices.nextInt();
+
+                if (friendID == 0) {
+                    done = true;
+                } else {
+                    // Display friend's profile
+                    try (PreparedStatement stmt = connection.prepareStatement("SELECT * FROM profiles WHERE userID = ?")) {
+                        stmt.setInt(1, friendID);
+                        ResultSet rs = stmt.executeQuery();
+                        if (rs.next()) {
+                            String name = rs.getString("name");
+                            String email = rs.getString("email");
+                            String dob = rs.getString("dateOfBirth");
+                            String active = rs.getString("lastLogin");
+                            System.out.printf("Name: %s\nEmail: %s\nDOB: %s\nLast Active: %s\n",
+                                    name, email, dob, active);
+                        } else {
+                            System.out.println("Error: friend not found");
+                        }
+                    } catch (SQLException e) {
+                        System.out.println("Error: " + e.getMessage());
+                        return -1;
+                    }
+                }
+            }
+            return 1;
     }
 
     public int rankGroups() {
@@ -616,7 +969,240 @@ public class BeSocial {
     }
 
     public int exit() {
+        try{
+            connection.close();
+        }
+        catch(SQLException s){
+            System.out.println("error closing connection");
+        }
         return 1;
     }
 
+    private int getGroupIDByName(String groupName) {
+        /**
+         * This function retrieves the groupID corresponding to the given group from the 'groupInfo' table.
+         *
+         * @param groupName the name of the group whose ID needs to be retrieved
+         * @return the ID of the group with the given email, or -1 if the name is not found in the 'groupInfo' table
+         */
+        int groupID = -1;
+        try {
+            // Prepare the SELECT statement
+            String selectQuery = "SELECT gID FROM groupInfo WHERE name = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(selectQuery);
+            preparedStatement.setString(1, groupName);
+
+            // Execute the SELECT statement
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                groupID = resultSet.getInt("gID");
+            }
+
+            // Close the ResultSet and PreparedStatement
+            resultSet.close();
+            preparedStatement.close();
+
+        } catch (SQLException e) {
+            System.out.println("Error retrieving groupID: " + e.getMessage());
+        }
+        return groupID;
+    }
+
+
+    private String getNameByEmail(String userEmail) {
+        /**
+         * This function retrieves the user name corresponding to the given email from the 'profile' table.
+         *
+         * @param userEmail the email of the user whose name needs to be retrieved
+         * @return the name of the user with the given email, or null if the email is not found in the 'profile' table
+         */
+        String name;
+        try {
+            // Prepare the SELECT statement
+            String selectQuery = "SELECT name FROM profile WHERE email = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(selectQuery);
+            preparedStatement.setString(1, userEmail);
+
+            // Execute the SELECT statement
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                name = resultSet.getString("name");
+            } else {
+                return null;
+            }
+
+            // Close the ResultSet and PreparedStatement
+            resultSet.close();
+            preparedStatement.close();
+
+        } catch (SQLException e) {
+            System.out.println("Error retrieving user name: " + e.getMessage());
+            return null;
+        }
+        return name;
+    }
+
+    private String getNameByUserID(int userID) {
+        /**
+         * This function retrieves the user name corresponding to the given ID from the 'profile' table.
+         *
+         * @param userID the ID of the user whose name needs to be retrieved
+         * @return the name of the user with the given ID, or null if the email is not found in the 'profile' table
+         */
+        String name;
+        try {
+            // Prepare the SELECT statement
+            String selectQuery = "SELECT name FROM profile WHERE userID = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(selectQuery);
+            preparedStatement.setInt(1, userID);
+
+            // Execute the SELECT statement
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                name = resultSet.getString("name");
+            } else {
+                return null;
+            }
+
+            // Close the ResultSet and PreparedStatement
+            resultSet.close();
+            preparedStatement.close();
+
+        } catch (SQLException e) {
+            System.out.println("Error retrieving user name: " + e.getMessage());
+            return null;
+        }
+        return name;
+    }
+
+    private boolean areFriends(int friendID) {
+        /**
+         * This function checks whether two users are already friends.
+         *
+         * @param friendID the ID of the second user
+         * @return true if the two users are already friends, false otherwise
+         */
+        try {
+            // Prepare the SELECT statement
+            String selectQuery = "SELECT * FROM friend WHERE (userID1 = ? AND userID2 = ?) OR (userID1 = ? AND userID2 = ?)";
+            PreparedStatement preparedStatement = connection.prepareStatement(selectQuery);
+            preparedStatement.setInt(1, userID);
+            preparedStatement.setInt(2, friendID);
+            preparedStatement.setInt(3, friendID);
+            preparedStatement.setInt(4, userID);
+
+            // Execute the SELECT statement
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return true;
+            }
+
+            // Close the ResultSet and PreparedStatement
+            resultSet.close();
+            preparedStatement.close();
+
+        } catch (SQLException e) {
+            System.out.println("Error checking if users are friends: " + e.getMessage());
+        }
+        return false;
+    }
+
+    private boolean alreadyFollowed(int friendID) {
+        /**
+         * Checks if the current user already follows target user
+         *
+         * @param friendEmail the email of the user who was followed.
+         * @return true if there is a pending friend request, false otherwise.
+         */
+        try {
+            // Prepare SQL statement to check if curr user follows friend
+            String sql = "SELECT * FROM pendingFriend WHERE fromID = ? AND toID = ?";
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                stmt.setInt(1, userID);
+                stmt.setInt(2, friendID);
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    // If result set has any rows, user already followed
+                    return rs.next();
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error checking for pending friend request: " + e.getMessage());
+            return false;
+        }
+
+        
+    }
+
+    private ArrayList<String> throwInList(ResultSet set) {
+        ArrayList<String> tempList = new ArrayList();
+        try {
+            while (set.next()) {
+                tempList.add(set.getRow(), set.toString());
+            }
+        } catch (SQLException e) {
+            System.out.println("Error Getting Follower");
+        }
+        return tempList;
+    }
+
+    private int getUserIDByEmail(String userEmail) {
+        /**
+         * This function retrieves the user ID corresponding to the given email from the 'profile' table.
+         *
+         * @param userEmail the email of the user whose ID needs to be retrieved
+         * @return the ID of the user with the given email, or -1 if the email is not found in the 'profile' table
+         */
+        int userID = -1;
+        try {
+            // Prepare the SELECT statement
+            String selectQuery = "SELECT userID FROM profile WHERE email = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(selectQuery);
+            preparedStatement.setString(1, userEmail);
+
+            // Execute the SELECT statement
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                userID = resultSet.getInt("userID");
+            }
+
+            // Close the ResultSet and PreparedStatement
+            resultSet.close();
+            preparedStatement.close();
+
+        } catch (SQLException e) {
+            System.out.println("Error retrieving userID: " + e.getMessage());
+        }
+        return userID;
+    }
+
+    private String getGroupNameByID(int groupID) {
+        /**
+         * This function retrieves the groupName corresponding to the given group from the 'groupInfo' table.
+         *
+         * @param groupID the ID of the group whose name needs to be retrieved
+         * @return the name of the group with the given ID, or null if the ID is not found in the 'groupInfo' table
+         */
+        String groupName = null;
+        try {
+            // Prepare the SELECT statement
+            String selectQuery = "SELECT gID FROM groupInfo WHERE gID = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(selectQuery);
+            preparedStatement.setInt(1, groupID);
+
+            // Execute the SELECT statement
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                groupName = resultSet.getString("name");
+            }
+
+            // Close the ResultSet and PreparedStatement
+            resultSet.close();
+            preparedStatement.close();
+
+        } catch (SQLException e) {
+            System.out.println("Error retrieving groupID: " + e.getMessage());
+        }
+        return groupName;
+    }
 }
