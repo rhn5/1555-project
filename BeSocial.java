@@ -148,6 +148,7 @@ public class BeSocial {
                 System.out.println("Are you sure you want to delete your profile? Enter 'yes' to confirm");
                 String confirm = kbd.next();
                 beSocial.dropProfile(deleteProfile,confirm);
+                topLevel = 0;
             }
             else if (topLevel == 4 && bottomLevel == 0) {
                 System.out.println("<-----EXIT----->");
@@ -476,7 +477,7 @@ public class BeSocial {
             deleteProfileStatement.close();
 
             PreparedStatement deleteMessageStatemnt = connection
-                    .prepareStatement("DELETE FROM message WHERE userID = ?");
+                    .prepareStatement("DELETE FROM message WHERE fromID = ?");
             deleteMessageStatemnt.setInt(1, userID);
             deleteMessageStatemnt.executeUpdate();
             deleteMessageStatemnt.close();
