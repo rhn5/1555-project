@@ -30,8 +30,6 @@ CREATE TABLE profile (
     -- Additional Semantic Integrity Constraints
     -- Constraint to check if the password length is at least 8 characters long
     CONSTRAINT profile_password_length CHECK (LENGTH(password) >= 8),
-    -- Constraint to check if the password contains at least one uppercase letter, one lowercase letter, and one number
-    CONSTRAINT profile_password_complexity CHECK (password ~ '^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).+$'),
     -- Constraint to check if the email format is valid
     CONSTRAINT profile_email_format CHECK (email !~ '[!#$&*+/=?^`{|}~]') -- and email ~ '^[\\p{L}0-9._%+-]+@[\\p{L}0-9.-]+\\.[\\p{L}]{2,}$')
 );
