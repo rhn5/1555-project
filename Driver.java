@@ -39,14 +39,32 @@ public class Driver {
 
         driver.login("admin@besocial.com", "admin");
         
-        for(int i = 10000; i < 100000; i++)
+        for(int i = 0; i < 100; i++)
         {
             driver.createProfile("test", "test214"+i+"@gmail.com", "21401417abAQW", Date.valueOf("2000-01-02"));
         }
-        for(int i = 10000; i < 100000; i++)
+        for(int i = 0; i < 100; i++)
         {
             driver.dropProfile("test214"+i+"@gmail.com", "yes");
         }
+        driver.logout();
+        driver.login("GautamJain@gmail.com", "pDPECU*6");
+        driver.createGroup("driverGroup", "test", 5);
+        driver.createGroup("driverGroup2", "test", 5);
+        driver.initiateAddingGroup(0, "test");
+        driver.confirmGroupMembership("10");
+        driver.leaveGroup("driverGroup");
+        driver.searchForProfile("NavinMahal@gmail.com");
+        driver.sendMessageToUser("NavinMahal@gmail.com", "null");
+        driver.sendMessageToGroup("null");
+        driver.displayMessages();
+        driver.displayNewMessages();
+        driver.displayFriends();
+        driver.rankGroups();
+        driver.rankProfiles();
+        driver.topMessages(5,10);
+        driver.threeDegrees(10);
+        driver.logout();
 
         
     }
