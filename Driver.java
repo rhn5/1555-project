@@ -43,7 +43,7 @@ public class Driver {
         Boolean exit = false;
         int topLevel = 0;
         int bottomLevel = 0;
-        int userID = -1;
+        int loggedIn = -1;
 
         try {
             BufferedReader logo = new BufferedReader(new FileReader("logo.txt"));
@@ -81,28 +81,63 @@ public class Driver {
             {
                 System.out.println("<-----CREATE PROFILE----->");
                 System.out.print("Name: ");
-                String name = kbd.nextLine();
+                String name = kbd.next();
                 System.out.print("Email: ");
                 String userEmail = kbd.next();
-                System.out.print("Password: ");
+                System.out.print("Password\n");
+                System.out.print("Minimum 8 Characters\nOne Uppercase\nOne Lowercase\nOne Number\n");
                 String userPass = kbd.next();
-                System.out.print("DOB: ");
+                System.out.print("DOB (yyyy-mm-dd): ");
                 String dob = kbd.next();  
                 Date dateOfBirth = Date.valueOf(dob);
 
-                beSocial.createProfile(name, userEmail, userPass, dateOfBirth);
                 
+                int success = beSocial.createProfile(name, userEmail, userPass, dateOfBirth);
+                /**
+                 * This loop creates a user profile using the provided name, email, password, and date of birth.
+                 * If the profile creation fails, the user is prompted to enter their information again.
+                 */
+                while(success == -1)
+                {
+                    System.out.println("<-----FAILED TO CREATE USER PROFILE----->");
+                    System.out.print("Name: ");
+                    name = kbd.next();
+                    System.out.print("Email: ");
+                    userEmail = kbd.next();
+                    System.out.print("Password: ");
+                    userPass = kbd.next();
+                    System.out.print("DOB (yyyy-mm-dd): ");
+                    dob = kbd.next();  
+                    dateOfBirth = Date.valueOf(dob);
+                    success = beSocial.createProfile(name, userEmail, userPass, dateOfBirth);
+                }
                 topLevel = 0; // PUSH USER BACK TO TOP LEVEL MENU
 
-            } else if (topLevel == 2 && userID == -1) // LOGIN
+            } else if (topLevel == 2 && loggedIn == -1) // LOGIN
             {
+                
                 System.out.println("<-----LOGIN----->");
                 System.out.print("Email: ");
                 String userEmail = kbd.next();
                 System.out.print("Password: ");
                 String userPass = kbd.next();
-                // LOG IN USER AND SET USERID TO USERID
-                userID = beSocial.login(userEmail, userPass);
+
+                // LOG IN USER AND SET loggedIn TO loggedIn
+                loggedIn = beSocial.login(userEmail, userPass);
+                
+                /**
+                 * Continuously prompts the user for their email and password until a valid loggedIn is returned from the beSocial.login method.
+                 * If the loggedIn is -1, the user is informed that their username or password is incorrect and prompted again.
+                 */
+                while(loggedIn == -1)
+                {
+                    System.out.println("<-----INCORRECT USERNAME/PASSWORD----->");
+                    System.out.print("Email: ");
+                    userEmail = kbd.next();
+                    System.out.print("Password: ");
+                    userPass = kbd.next();
+                    loggedIn = beSocial.login(userEmail, userPass);
+                }
                 
             } else if (topLevel == 3 && bottomLevel == 0) {
                 System.out.println("<-----DELETE PROFILE----->");
@@ -122,7 +157,7 @@ public class Driver {
              * If the user is not logged in, the menu will prompt the user to log in or create an account.
              * Once the user selects an option, the corresponding action will be executed.
              */
-            if (userID != -1) {
+            if (loggedIn != -1) {
                 System.out.println("<-----BeSocial----->");
                 System.out.println("1. initiateFriendship");
                 System.out.println("2. confirmFriendRequests");
@@ -143,21 +178,21 @@ public class Driver {
                 System.out.println("17. logout");
                 System.out.print("Input:");
                 bottomLevel = kbd.nextInt();
-                if(!(bottomLevel > 1 && bottomLevel < 18))
+                if(!(bottomLevel > 0 && bottomLevel < 18))
                 {
                     System.out.println("PLEASE ENTER A VALID OPERATION:");
                     bottomLevel = Integer.parseInt(kbd.next());
                 }
             }
             if (bottomLevel == 1) {
-                System.out.println("Enter userID you want to become friends with:");
+                System.out.println("Enter loggedIn you want to become friends with:");
                 int friendID;
                 friendID = kbd.nextInt();
                 beSocial.initiateFriendship(friendID);
 
             }
             if (bottomLevel == 2) {
-
+                
             }
             if (bottomLevel == 3) {
 
@@ -202,9 +237,10 @@ public class Driver {
 
             }
             if (bottomLevel == 17) {
-                userID = -1;
+                loggedIn = -1;
                 topLevel = 0;
                 bottomLevel = 0;
+                beSocial.logout();
             }
             
             

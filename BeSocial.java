@@ -68,8 +68,15 @@ public class BeSocial {
         st.setString(4, password);
         st.setDate(5, dateOfBirth);
         st.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
-        st.executeUpdate();
-        return 1;
+        try{
+            st.executeUpdate();
+            return 1;
+        }
+        catch(SQLException e)
+        {
+            return -1;
+        }
+        
 
     }
 
