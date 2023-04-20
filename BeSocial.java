@@ -239,7 +239,7 @@ public class BeSocial {
                 }
             }
             if (bottomLevel == 5) {
-                int success = beSocial.confirmGroupMembership(-1);
+                int success = beSocial.confirmGroupMembership("-1");
                 if(success == -1)
                 {
                     System.out.println("<-----GROUP CONFIRMATION FAILED----->");
@@ -663,22 +663,13 @@ public class BeSocial {
 
         return 1;
     }
-    
-    public int confirmGroupMembership() {
-        //display formatted numbered list of all pending group member where user is group m
-        //user shoud be prompted for a num of request they would liek to confirm, 1 at time, or all
-        //move selectd requests to pending group member relation to groupmember using urrent time
-        //if accepting pending group member would exceed group's size accepted requet should remain in pending
-        //remaining requets which were not selected are declined and removed from pending
-        //no pending group member request for any groups that the user is a manager of, 
-        //message of no groups are curr managerd should be displated
-        //no groups are currently managed if user is not a manager. 
+
+    public int confirmGroupMembership(String lineNum) {
 
         //find out if user is a manager
         String query = "SELECT gID FROM groupMember WHERE role = 'manager' userID=" + userID;
         int gID = 0;
         ArrayList<Integer> gidList= new ArrayList<>();
-        ArrayList<Integer> sizeList = new ArrayList<>();
         ArrayList<String> textList = new ArrayList<>();
         ArrayList<Integer> uidList = new ArrayList<>();
         Hashtable<Integer,Integer> groupSize = new Hashtable<>();
@@ -695,13 +686,12 @@ public class BeSocial {
         }
         for (int i = 0; i < gidList.size(); i ++){
             query = "SELECT size FROM groupInfo WHERE gID = " + gidList.get(i);
-            Statement st = null;//connection.createStatement();
-            ResultSet rs = null;//st.executeQuery(query);
+            Statement st = null;
+            ResultSet rs = null;
             try{
                 st = connection.createStatement();
                 rs = st.executeQuery(query);
                 if(rs.next()){
-                    //sizeList.add(rs.getInt("size"));
                     groupSize.put(gidList.get(i), rs.getInt("size"));
                 }
             }
@@ -743,6 +733,10 @@ public class BeSocial {
                 }
             }
             catch(SQLException s){
+                System.out.println("error executing query");
+                System.out.println("Error message: " + s.getMessage());
+                System.out.println("SQL state: " + s.getSQLState());
+                System.out.println("Error code: " + s.getErrorCode());
                 System.out.println();
             }
         }
@@ -755,13 +749,58 @@ public class BeSocial {
         }
         //displayed now pick which one
         System.out.println("Type in the line number that you want to accept or type all to accept all");
-        String result = scan.next();
+        String result = "";
+        if(!lineNum.equals("-1")){
+            result = lineNum;
+        }
+        else{
+            result = scan.next();
+
+        }
+        //String result = scan.next();
         if(result.equals("all")){
-            String insert = "INSERT INTO ";
+            String insert = "INSERT INTO groupMember VALUES (?, ?, ?, ?)";
+            for(int i = 0; i < gidList.size(); i ++){
+                try{
+                    PreparedStatement st = connection.prepareStatement(insert);
+                    st.setInt(1, gidList.get(i));
+                    st.setInt(2, uidList.get(i));
+                    st.setString(3, "Member");
+                    st.setTimestamp(4, clockTime);
+            
+                }
+                catch(SQLException s){
+                    System.out.println("error executing query");
+                    System.out.println("Error message: " + s.getMessage());
+                    System.out.println("SQL state: " + s.getSQLState());
+                    System.out.println("Error code: " + s.getErrorCode());
+                    return -1;
+                }
+            }
+        }
+        else{
+            String insert = "INSERT INTO groupMember VALUES (?, ?, ?, ?)";
+
+            int temp = Integer.parseInt(result);
+            try{
+                PreparedStatement st = connection.prepareStatement(insert);
+                st.setInt(1, gidList.get(temp));
+                st.setInt(2, uidList.get(temp));
+                st.setString(3, "Member");
+                st.setTimestamp(4, clockTime);
+            }
+            catch(SQLException s){
+                System.out.println("error executing query");
+                System.out.println("Error message: " + s.getMessage());
+                System.out.println("SQL state: " + s.getSQLState());
+                System.out.println("Error code: " + s.getErrorCode());
+                return -1;
+            }
         }
 
         //look for count of requests where user is man, if none display message
         
+
         return 1;
     }
 
@@ -785,33 +824,24 @@ public class BeSocial {
         
         String [] words = searchWord.split(" ");
         System.out.println(words.length);
-        String query = "";
-        PreparedStatement st = null;
-        int c = 1;
+        String query = "SELECT * FROM profile WHERE ";
         for(int i = 0; i < words.length; i ++){
-            query += "SELECT * FROM profile WHERE name LIKE ?" + " OR email LIKE ?";
-            try{
-                st = connection.prepareStatement(query);
-                System.out.println("%"+words[i]+"%");
-                System.out.println(c);
-                st.setString(c, "%"+words[i]+"%");
-                c++;
-                System.out.println(c);
-                st.setString(c, "%"+words[i]+"%");
-                c++;
-            }
-            catch(SQLException s){
-                System.out.println("error");
-            }
+            query += " name LIKE ? OR email LIKE ?";
             if(i != words.length -1){
-                query = query + " UNION ";
+                query +=  " AND ";
             }
         }
-        System.out.println(query);
-        //ResultSet rs = null;
         try{
+            PreparedStatement st = connection.prepareStatement(query);
+            int c = 1;
+            for(int i = 0 ; i < words.length; i ++){
+                st.setString(c, "%"+words[i]+"%");
+                c++;
+                st.setString(c, "%"+words[i]+"%");
+                c++;
+            }     
 
-            ResultSet rs = st.executeQuery(query);
+            ResultSet rs = st.executeQuery();
             int count = 0;
             while(rs.next()){
                 int id = rs.getInt("userID");
@@ -820,6 +850,7 @@ public class BeSocial {
                 System.out.println(count +" name = " + name + " email = " + "id = " + userID); 
                 count++;
             }
+            st.close();
         }
         catch(SQLException s){
             System.out.println("error executing query");
@@ -828,17 +859,7 @@ public class BeSocial {
             System.out.println("Error code: " + s.getErrorCode());
             return -1;
         }
-        finally{
-            
-            if(st != null){
-                try{
-                    st.close();
-                }
-                catch(SQLException s){
-                    System.out.println("error closing statement");
-                }
-            }
-        }
+        //st.close();
         return 1;
     }
 
