@@ -142,8 +142,12 @@ public class BeSocial {
                 
             } else if (topLevel == 3 && bottomLevel == 0) {
                 System.out.println("<-----DELETE PROFILE----->");
-
-                beSocial.dropProfile();
+                System.out.print("Account to Delete: ");
+                String deleteProfile = kbd.next();
+                // Prompt user to confirm deletion
+                System.out.println("Are you sure you want to delete your profile? Enter 'yes' to confirm");
+                String confirm = kbd.next();
+                beSocial.dropProfile(deleteProfile,confirm);
             }
             else if (topLevel == 4 && bottomLevel == 0) {
                 System.out.println("<-----EXIT----->");
@@ -176,8 +180,7 @@ public class BeSocial {
                 System.out.println("14. rankProfiles");
                 System.out.println("15. topMessages");
                 System.out.println("16. threeDegrees");
-                System.out.println("17. dropProfile");
-                System.out.println("18, logout");
+                System.out.println("17. logout");
                 System.out.print("Input:");
                 bottomLevel = kbd.nextInt();
                 System.out.println("BOTTOM LEVEL = "+ bottomLevel);
@@ -236,10 +239,11 @@ public class BeSocial {
                 }
             }
             if (bottomLevel == 5) {
-
+                
             }
             if (bottomLevel == 6) {
-                System.out.println("enter group name:");
+                System.out.println("<-----LEAVE GROUP----->");
+                System.out.println("Enter group name:");
                 String groupName = kbd.next();
                 beSocial.leaveGroup(groupName);
             }
@@ -268,7 +272,10 @@ public class BeSocial {
             if (bottomLevel == 11) {   
                 beSocial.displayNewMessages();
             }
-            if (bottomLevel == 12) {
+            if (bottomLevel == 12) {//issue
+
+
+                
                 beSocial.displayFriends();
             }
             if (bottomLevel == 13) {
@@ -281,14 +288,11 @@ public class BeSocial {
                 beSocial.topMessages(0, 2);
             }
             if (bottomLevel == 16) {
-                System.out.println("enter user ID to find three degrees:");
+                System.out.println("Enter user ID to find three degrees:");
                 int id= kbd.nextInt();
                 beSocial.threeDegrees(id);
             }
-            if (bottomLevel == 17) {
-                beSocial.dropProfile();
-            }
-            if(bottomLevel == 18 ){
+            if(bottomLevel == 17 ){
                 loggedIn = -1;
                 topLevel = 0;
                 bottomLevel = 0;
@@ -399,16 +403,9 @@ public class BeSocial {
         }
     }
 
-    public boolean dropProfile() {
+    public boolean dropProfile(String email, String confirm) {
         try {
-            // Prompt user to confirm deletion
-            //System.out.println("Are you sure you want to delete your profile? Enter 'delete [name]' to confirm.");
-            System.out.println("Are you sure you want to delete your profile? Enter 'yes' to confirm");
-
-            Scanner choices = new Scanner(System.in);
-            String input = choices.nextLine().trim();
-
-            if (!input.equals("yes")) {
+            if (!confirm.equals("yes")) {
                 System.out.println("Deletion not confirmed. Profile was not deleted.");
                 return false;
             }
@@ -633,7 +630,7 @@ public class BeSocial {
 
         return 1;
     }
-
+    
     public int confirmGroupMembership() {
         //display formatted numbered list of all pending group member where user is group m
         //user shoud be prompted for a num of request they would liek to confirm, 1 at time, or all
