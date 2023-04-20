@@ -158,7 +158,7 @@ public class Driver {
              * If the user is not logged in, the menu will prompt the user to log in or create an account.
              * Once the user selects an option, the corresponding action will be executed.
              */
-            if (userID != -1) {
+            if (loggedIn != -1) {
                 System.out.println("<-----BeSocial----->");
                 System.out.println("1. initiateFriendship");
                 System.out.println("2. confirmFriendRequests");
@@ -196,10 +196,21 @@ public class Driver {
                 beSocial.confirmFriendRequests();
             }
             if (bottomLevel == 3) {
-
+                System.out.println("<-----CREATE GROUP----->");
+                System.out.print("Name: ");
+                String name = kbd.next();
+                System.out.print("Description: ");
+                String description = kbd.next();
+                System.out.print("size:");
+                int groupSize = kbd.nextInt();
+                beSocial.createGroup(name,description, groupSize);
             }
             if (bottomLevel == 4) {
-
+                System.out.println("Enter Request Text:");
+                String request = kbd.next();
+                System.out.println("Enter group ID: ");
+                int gID = kbd.nextInt();
+                beSocial.initiateAddingGroup(gID, request);
             }
             if (bottomLevel == 5) {
 
