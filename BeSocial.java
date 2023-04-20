@@ -314,7 +314,18 @@ public class BeSocial {
 
     public int displayMessages() {
         String select = "SELECT * from message where toID = " + userID;
-        return 1;
+        try{
+            Statement st = connection.createStatement();
+            ResultSet rs = st.executeQuery(select);
+            if(rs.next()){
+                return 1;
+            }
+        }
+        catch(SQLException s){
+            return -1;
+        }
+        
+        
     }
 
     public int displayNewMessages() {
