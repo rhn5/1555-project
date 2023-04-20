@@ -36,14 +36,14 @@ public class Driver {
     }
     public static void main(String[] args) throws SQLException, ClassNotFoundException, IOException {
         BeSocial driver = new BeSocial();
-        
+
         driver.login("admin@besocial.com", "admin");
         
-        for(int i = 0; i < 100; i++)
+        for(int i = 10000; i < 100000; i++)
         {
             driver.createProfile("test", "test214"+i+"@gmail.com", "21401417abAQW", Date.valueOf("2000-01-02"));
         }
-        for(int i = 0; i < 100; i++)
+        for(int i = 10000; i < 100000; i++)
         {
             driver.dropProfile("test214"+i+"@gmail.com", "yes");
         }
