@@ -82,7 +82,7 @@ CREATE TABLE groupInfo (
     -- Structural Integrity Constraints: Assumes that the size of the group must be a positive integer.
     -- Semantic Integrity Constraints: Assumes that group names must be unique.
     gID INTEGER PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
+    name VARCHAR(50) UNIQUE NOT NULL,
     size INTEGER NOT NULL,
     description VARCHAR(200),
     -- Structural Integrity Constraints
