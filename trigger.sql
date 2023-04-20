@@ -65,7 +65,7 @@ BEGIN
    IF NEW.toGroupID IS NOT NULL THEN
        --Send Message to Every Member of the Group
          FOR member IN
-            SELECT userID FROM groupMember WHERE gID = NEW.toGroupID
+            SELECT userID FROM groupMember WHERE gID = NEW.toGroupID and userID != NEW.fromID
          LOOP
             INSERT INTO messageRecipient (msgID, userID) VALUES (NEW.msgID, member.userID);
          END LOOP;
