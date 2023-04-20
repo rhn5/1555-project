@@ -220,6 +220,7 @@ public class Driver {
                 }
             }
             if (bottomLevel == 4) {
+                System.out.println("<-----GROUP JOIN REQUEST----->");
                 System.out.println("Enter Request Text:");
                 String request = kbd.next();
                 System.out.println("Enter group ID: ");
