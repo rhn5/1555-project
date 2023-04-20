@@ -181,7 +181,7 @@ CREATE TABLE Clock (
 );
 
 -- Insert the initial tuple in the Clock table
-INSERT INTO Clock VALUES (NOW());
+INSERT INTO Clock VALUES ('2022-01-01 00:00:00');
 
 ALTER TABLE groupmember DROP CONSTRAINT IF EXISTS groupmember_pkey;
 ALTER TABLE groupmember ADD CONSTRAINT groupmember_pkey PRIMARY KEY (gID, userID);
