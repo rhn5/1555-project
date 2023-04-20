@@ -318,13 +318,13 @@ public class BeSocial {
             Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(select);
             if(rs.next()){
-                return 1;
+                
             }
         }
         catch(SQLException s){
             return -1;
         }
-        
+        return 1;
         
     }
 
