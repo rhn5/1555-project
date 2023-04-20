@@ -239,6 +239,7 @@ public class BeSocial {
                 }
             }
             if (bottomLevel == 5) {
+                System.out.println("<-----GROUP MEMBERSHIP CONFIRMATION----->");
                 int success = beSocial.confirmGroupMembership("-1");
                 if(success == -1)
                 {
@@ -256,6 +257,7 @@ public class BeSocial {
                 }
             }
             if (bottomLevel == 7) {
+                System.out.println("<-----PROFILE SEARCH----->");
                 System.out.println("Enter name to search: ");
                 kbd.nextLine();
                 String name = kbd.nextLine();
@@ -266,7 +268,7 @@ public class BeSocial {
                 }
             }
             if (bottomLevel == 8) {
-                System.out.println("<-----SEND MESSAGE----->");
+                System.out.println("<-----SEND MESSAGE TO USER----->");
                 System.out.println("Sending Message To (email): ");
                 String toUser = kbd.next();
                 System.out.println("Message: ");
@@ -278,6 +280,7 @@ public class BeSocial {
                 }
             }
             if (bottomLevel == 9) {
+                System.out.println("<-----SEND MESSAGE TO GROUP----->");
                 System.out.println("Enter group name");
                 String groupName = kbd.next();
                 int success = beSocial.sendMessageToGroup(groupName);
@@ -287,30 +290,52 @@ public class BeSocial {
                 }
             }
             if (bottomLevel == 10) { 
+                System.out.println("<-----MESSAGES----->");
                 int success = beSocial.displayMessages();
                 if(success == -1)
                 {
                     System.out.println("<-----MESSAGE DISPLAY FAILED----->");
                 }
             }
-            if (bottomLevel == 11) {   
+            if (bottomLevel == 11) {
+                System.out.println("<-----NEW MESSAGES----->");   
                 int success = beSocial.displayNewMessages();
                 if(success == -1)
                 {
                     System.out.println("<-----MESSAGE DISPLAY FAILED----->");
                 }
             }
-            if (bottomLevel == 12) {                
-                beSocial.displayFriends();
+            if (bottomLevel == 12) {           
+                System.out.println("<-----YOUR FRIENDS----->");      
+                int success = beSocial.displayFriends();
+                if(success == -1)
+                {
+                    System.out.println("<-----MESSAGE DISPLAY FAILED----->");
+                }
             }
             if (bottomLevel == 13) {
-                beSocial.rankGroups();
+                System.out.println("<-----TOP 10 GROUPS----->");   
+                int success = beSocial.rankGroups();
+                if(success == -1)
+                {
+                    System.out.println("<-----GROUP RANKING FAILED----->");
+                }
             }
             if (bottomLevel == 14) {
-                beSocial.rankProfiles();
+                System.out.println("<-----TOP 10 PROFILES----->");   
+                int success = beSocial.rankProfiles();
+                if(success == -1)
+                {
+                    System.out.println("<-----PROFILE RANKING FAILED----->");
+                }
             }
             if (bottomLevel == 15) {
-                beSocial.topMessages(0, 2);
+                System.out.println("<-----TOP MESSAGES----->");
+                System.out.println("T0P NUMBER OF MESSAGES: ");
+                int messageCNT = kbd.nextInt();
+                System.out.println("X MONTHS: ");
+                int monthCNT = kbd.nextInt();
+                int success = beSocial.topMessages(messageCNT, monthCNT);
             }
             if (bottomLevel == 16) {
                 System.out.println("Enter user ID to find three degrees:");
@@ -1143,7 +1168,7 @@ public class BeSocial {
         }
     }
 
-    public void topMessages(int k, int x) {
+    public int topMessages(int k, int x) {
         try {
             // Get the current date from the Clock table
             PreparedStatement getCurrentDate = connection.prepareStatement("SELECT pseudoTime FROM Clock");
@@ -1195,8 +1220,10 @@ public class BeSocial {
 
             // Close the database connection
             //connection.close();
+            return 1;
         } catch (SQLException e) {
             e.printStackTrace();
+            return -1;
         }
     }
 

@@ -44,8 +44,8 @@ CREATE TABLE friend (
     -- Set the primary key to userID1 and userID2 to ensure each friendship is unique
     PRIMARY KEY (userID1, userID2),
     -- Add foreign key constraints to ensure that userID1 and userID2 exist in the profile table
-    FOREIGN KEY (userID1) REFERENCES profile(userID),
-    FOREIGN KEY (userID2) REFERENCES profile(userID),
+    FOREIGN KEY (userID1) REFERENCES profile(userID) ON DELETE CASCADE,
+    FOREIGN KEY (userID2) REFERENCES profile(userID) ON DELETE CASCADE,
     -- Structural Integrity Constraints
     -- Add a constraint to check that the length of the request text is no more than 200 characters,
     -- which helps to maintain data quality and prevent invalid input
@@ -64,8 +64,8 @@ CREATE TABLE pendingFriend (
     -- Set the primary key to fromID and toID to ensure each friend request is unique
     PRIMARY KEY (fromID, toID),
     -- Add foreign key constraints to ensure that fromID and toID exist in the profile table
-    FOREIGN KEY (fromID) REFERENCES profile(userID),
-    FOREIGN KEY (toID) REFERENCES profile(userID),
+    FOREIGN KEY (fromID) REFERENCES profile(userID) ON DELETE CASCADE,
+    FOREIGN KEY (toID) REFERENCES profile(userID) ON DELETE CASCADE,
     -- Structural Integrity Constraints
     -- Add a constraint to check that the length of the request text is no more than 200 characters,
     -- which helps to maintain data quality and prevent invalid input
@@ -102,8 +102,8 @@ CREATE TABLE groupMember (
     lastConfirmed TIMESTAMP,
 
     --gID is a foreign key referencing gID in groupInfo table and userID is a foreign key referencing userID in profile table
-    FOREIGN KEY (gID) REFERENCES groupInfo(gID),
-    FOREIGN KEY (userID) REFERENCES profile(userID),
+    FOREIGN KEY (gID) REFERENCES groupInfo(gID) ON DELETE CASCADE,
+    FOREIGN KEY (userID) REFERENCES profile(userID) ON DELETE CASCADE,
 
     --The Primary Key is a composite key on gID and userID which uniquely identifies a groupMember
     PRIMARY KEY (gID, userID),
@@ -128,8 +128,8 @@ CREATE TABLE pendingGroupMember (
     requestTime TIMESTAMP,
 
     --gID is a foreign key referencing gID in groupInfo table and userID is a foreign key referencing userID in profile table
-    FOREIGN KEY (gID) REFERENCES groupInfo(gID),
-    FOREIGN KEY (userID) REFERENCES profile(userID),
+    FOREIGN KEY (gID) REFERENCES groupInfo(gID) ON DELETE CASCADE,
+    FOREIGN KEY (userID) REFERENCES profile(userID) ON DELETE CASCADE,
 
     --The primary key is a composite key on gID and userID which uniquely identifies a pendingGroupMember
     PRIMARY KEY (gID, userID),
@@ -152,9 +152,9 @@ CREATE TABLE message (
     toUserID INTEGER,
     toGroupID INTEGER,
     timeSent TIMESTAMP NOT NULL,
-    FOREIGN KEY (fromID) REFERENCES profile(userID),
-    FOREIGN KEY (toUserID) REFERENCES profile(userID),
-    FOREIGN KEY (toGroupID) REFERENCES groupInfo(gID),
+    FOREIGN KEY (fromID) REFERENCES profile(userID) ON DELETE CASCADE,
+    FOREIGN KEY (toUserID) REFERENCES profile(userID) ON DELETE CASCADE,
+    FOREIGN KEY (toGroupID) REFERENCES groupInfo(gID) ON DELETE CASCADE,
     -- Structural Integrity Constraints
     -- Constraint to check if the messageBody length is no more than 200 characters
     CONSTRAINT message_messageBody_length CHECK (LENGTH(messageBody) <= 200),
@@ -171,8 +171,8 @@ CREATE TABLE messageRecipient (
     --The primary key is msgID which uniquely identifies a message
     PRIMARY KEY (msgID, userID),
     --fromID is a foreign key referencing userID in profile table, toUserID is a foreign key referencing userID in profile table and toGroupID is a foreign key referencing gID in groupInfo table
-    FOREIGN KEY (msgID) REFERENCES message(msgID),
-    FOREIGN KEY (userID) REFERENCES profile(userID)
+    FOREIGN KEY (msgID) REFERENCES message(msgID) ON DELETE CASCADE,
+    FOREIGN KEY (userID) REFERENCES profile(userID) ON DELETE CASCADE
 );
 
 -- Create the Clock table
@@ -182,6 +182,3 @@ CREATE TABLE Clock (
 
 -- Insert the initial tuple in the Clock table
 INSERT INTO Clock VALUES ('2022-01-01 00:00:00');
-
-ALTER TABLE groupmember DROP CONSTRAINT IF EXISTS groupmember_pkey;
-ALTER TABLE groupmember ADD CONSTRAINT groupmember_pkey PRIMARY KEY (gID, userID);
