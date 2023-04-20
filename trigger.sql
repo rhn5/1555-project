@@ -4,8 +4,11 @@ DECLARE
     user2_following_user1 INTEGER;
     message_text VARCHAR(100);
     new_msg_id INTEGER;
+    latest_time TIMESTAMP;
 BEGIN
     SELECT COUNT(*) INTO user2_following_user1 FROM pendingFriend WHERE fromID = NEW.toID AND toID = NEW.fromID;
+    SELECT MAX(pseudoTime) INTO latest_time FROM Clock;
+    
 
     -- Generate a unique msgID value
     LOOP
@@ -16,7 +19,7 @@ BEGIN
     -- User1 Followed User2 (User2 does not follow User1) Notify User2 They Were Followed
     IF user2_following_user1 = 0 THEN
         message_text := 'User ' || NEW.fromID || ' Followed You! Follow Them Back To Become Friends!';
-        INSERT INTO message VALUES(new_msg_id, NEW.fromID, message_text, NEW.toID, NULL, NOW());
+        INSERT INTO message VALUES(new_msg_id, NEW.fromID, message_text, NEW.toID, NULL, latest_time);
     ELSE
         -- User1 Followed User2 (User2 already follows User1) Notify Both Users of New Friend Ship
         INSERT INTO friend(userid1, userid2) VALUES(NEW.fromID, NEW.toID);
@@ -25,7 +28,7 @@ BEGIN
 
         -- Send New Friend Message
         INSERT INTO message(msgID, fromid, touserid, messagebody, timeSent)
-        VALUES(new_msg_id, NEW.fromID, NEW.toID, message_text, NOW());
+        VALUES(new_msg_id, NEW.fromID, NEW.toID, message_text, latest_time);
 
         -- Remove from pendingFriend (Followers List)
         DELETE FROM pendingFriend WHERE (fromID = NEW.fromID AND toID = NEW.toID) OR (fromID = NEW.toID AND toID = NEW.fromID);
@@ -101,11 +104,6 @@ BEGIN
     SELECT userID INTO adminID FROM groupMember WHERE gID = NEW.gID AND role = 'Admin' LIMIT 1;
     SELECT name INTO groupName FROM groupinfo WHERE gID = NEW.gID;
     SELECT MAX(pseudoTime) INTO latest_time FROM Clock;
-    
-    IF member_count >= NEW.size THEN
-        DELETE FROM groupMember WHERE gID = NEW.gID AND userID = NEW.userID;
-        RAISE EXECPTION 'Group is already full';
-    END IF;
 
     IF TG_OP = 'INSERT' THEN
         IF member_count = 0 THEN
