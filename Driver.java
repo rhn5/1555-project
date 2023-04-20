@@ -98,9 +98,11 @@ public class Driver {
                  * This loop creates a user profile using the provided name, email, password, and date of birth.
                  * If the profile creation fails, the user is prompted to enter their information again.
                  */
-                while(success == -1)
+                int count = 1;
+                while(success == -1 && count < 4)
                 {
                     System.out.println("<-----FAILED TO CREATE USER PROFILE----->");
+                    System.out.println("Attempt " + count + "/3");
                     System.out.print("Name: ");
                     name = kbd.next();
                     System.out.print("Email: ");
@@ -111,6 +113,7 @@ public class Driver {
                     dob = kbd.next();  
                     dateOfBirth = Date.valueOf(dob);
                     success = beSocial.createProfile(name, userEmail, userPass, dateOfBirth);
+                    count++;
                 }
                 topLevel = 0; // PUSH USER BACK TO TOP LEVEL MENU
 
@@ -125,19 +128,25 @@ public class Driver {
 
                 // LOG IN USER AND SET loggedIn TO loggedIn
                 loggedIn = beSocial.login(userEmail, userPass);
-                
+                int count = 1;
                 /**
                  * Continuously prompts the user for their email and password until a valid loggedIn is returned from the beSocial.login method.
                  * If the loggedIn is -1, the user is informed that their username or password is incorrect and prompted again.
                  */
-                while(loggedIn == -1)
+                while(loggedIn == -1 && count < 4)
                 {
                     System.out.println("<-----INCORRECT USERNAME/PASSWORD----->");
+                    System.out.println("Attempt " + count + "/3");
                     System.out.print("Email: ");
                     userEmail = kbd.next();
                     System.out.print("Password: ");
                     userPass = kbd.next();
                     loggedIn = beSocial.login(userEmail, userPass);
+                    count++;
+                }
+                if(count == 4)
+                {
+                    topLevel = 0;
                 }
                 
             } else if (topLevel == 3 && bottomLevel == 0) {
@@ -196,6 +205,7 @@ public class Driver {
                     System.out.println("<-----FRIEND REQUEST FAILED----->");
                 }
             }
+            
             if (bottomLevel == 2) {
                 System.out.println("<-----CONFIRM FRIEND REQUESTS----->");
                 int success = beSocial.confirmFriendRequests();
