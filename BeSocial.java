@@ -141,8 +141,12 @@ public class BeSocial {
                 
             } else if (topLevel == 3 && bottomLevel == 0) {
                 System.out.println("<-----DELETE PROFILE----->");
-
-                beSocial.dropProfile();
+                System.out.print("Account to Delete: ");
+                String deleteProfile = kbd.next();
+                // Prompt user to confirm deletion
+                System.out.println("Are you sure you want to delete your profile? Enter 'yes' to confirm");
+                String confirm = kbd.next();
+                beSocial.dropProfile(deleteProfile,confirm);
             }
             else if (topLevel == 4 && bottomLevel == 0) {
                 System.out.println("<-----EXIT----->");
@@ -264,6 +268,9 @@ public class BeSocial {
                 beSocial.displayNewMessages();
             }
             if (bottomLevel == 12) {//issue
+
+
+                
                 beSocial.displayFriends();
             }
             if (bottomLevel == 13) {
@@ -391,16 +398,9 @@ public class BeSocial {
         }
     }
 
-    public boolean dropProfile() {
+    public boolean dropProfile(String email, String confirm) {
         try {
-            // Prompt user to confirm deletion
-            //System.out.println("Are you sure you want to delete your profile? Enter 'delete [name]' to confirm.");
-            System.out.println("Are you sure you want to delete your profile? Enter 'yes' to confirm");
-
-            Scanner choices = new Scanner(System.in);
-            String input = choices.nextLine().trim();
-
-            if (!input.equals("yes")) {
+            if (!confirm.equals("yes")) {
                 System.out.println("Deletion not confirmed. Profile was not deleted.");
                 return false;
             }
