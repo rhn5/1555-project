@@ -248,10 +248,13 @@ public class BeSocial {
                 String name = kbd.nextLine();
                 beSocial.searchForProfile(name);
             }
-            if (bottomLevel == 8) { 
-                System.out.println("Enter user email you want to send message to");
-                String email = kbd.next();
-                beSocial.sendMessageToUser(email);
+            if (bottomLevel == 8) {
+                System.out.println("<-----SEND MESSAGE----->");
+                System.out.println("Sending Message To (email): ");
+                String toUser = kbd.next();
+                System.out.println("Message: ");
+                String message = kbd.next();
+                beSocial.sendMessageToUser(toUser,message);
             }
             if (bottomLevel == 9) {
                 System.out.println("Enter group name");
@@ -808,8 +811,8 @@ public class BeSocial {
         return 1;
     }
 
-    public int sendMessageToUser(String toUserEmail) {
-        Scanner choices = new Scanner(System.in);
+    public int sendMessageToUser(String toUserEmail, String msgBody) {
+            
             try {
                 PreparedStatement message = connection.prepareStatement("INSERT INTO message VALUES(?, ?, ?, ?, ?, ?)");
                 String userName = getNameByEmail(toUserEmail);
