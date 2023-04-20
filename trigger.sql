@@ -99,6 +99,11 @@ BEGIN
     SELECT COUNT(*) INTO member_count from groupMember where gID = NEW.gID;
     SELECT userID INTO adminID FROM groupMember WHERE gID = NEW.gID AND role = 'Admin' LIMIT 1;
     SELECT name INTO groupName FROM groupinfo WHERE gID = NEW.gID;
+    
+    IF member_count >= NEW.size THEN
+        DELETE FROM groupMember WHERE gID = NEW.gID AND userID = NEW.userID;
+        RAISE EXECPTION 'Group is already full';
+    END IF;
 
     IF TG_OP = 'INSERT' THEN
         IF member_count = 0 THEN
