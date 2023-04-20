@@ -23,6 +23,7 @@ public class BeSocial {
     private String username;
     private String password;
     private Scanner scan = new Scanner(System.in);
+    private Scanner choices = new Scanner(System.in);
     private int userID;
     private Timestamp clockTime;
     public static void main(String[] args) throws SQLException, ClassNotFoundException, IOException {
@@ -820,8 +821,6 @@ public class BeSocial {
                 int toID = getUserIDByEmail(toUserEmail);
                 System.out.println(toID);
                 int msgID;
-                String msgBody;
-
 
                 String count = "SELECT COUNT(*) FROM message";
                 Statement countStatement = connection.createStatement();
@@ -833,8 +832,6 @@ public class BeSocial {
 
                 do {
                     System.out.println("Sending Message To: " + userName);
-                    System.out.printf("Enter Message [Max 200 chars and can't be blank] -> ");
-                    msgBody = choices.next();
                 } while (msgBody.length() > 200 || msgBody.isBlank());
                 message.setInt(1, msgID);
                 message.setInt(2, userID);

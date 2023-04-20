@@ -41,15 +41,15 @@ public class Driver {
         driver.dropProfile("driver@gmail.com");
 
         //creating user profile for driver@gmail.com
-        driver.createProfile("test","driver@gmail.com" , "Datadata123", Date.valueOf("2000-1-1"));
+        driver.createProfile("test","driver@gmail.com" , "Datadata123", Date.valueOf("2000-01-01"));
         //showing that if run again it fails
-        driver.createProfile("test","driver@gmail.com" , "Datadata123", Date.valueOf("2000-1-1"));
+        driver.createProfile("test","driver@gmail.com" , "Datadata123", Date.valueOf("2000-01-01"));
 
         //drop the profile for driver@gmail.com, should be successful
         driver.dropProfile("driver@gmail.com");
 
         //creating user profile for driver@gmail.com again
-        driver.createProfile("test","driver@gmail.com" , "Datadata123", Date.valueOf("2000-1-1"));
+        driver.createProfile("test","driver@gmail.com" , "Datadata123", Date.valueOf("2000-01-01"));
 
         //login the driver
         driver.login("driver@gmail.com", "Datadata123");
