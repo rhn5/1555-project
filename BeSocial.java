@@ -343,7 +343,7 @@ public class BeSocial {
 
     public int logout() {
         userID = -1;
-
+        
         return 1;
     }
 
