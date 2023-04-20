@@ -96,10 +96,10 @@ public class Driver {
         driver.rankProfiles();
 
         //Testing top Messages
-        driver.topMessages();
+        driver.topMessages(10,10);
 
         //Test Three Degrees
-        driver.threeDegrees();
+        driver.threeDegrees(10);
 
         //Test Logout
         driver.logout();
