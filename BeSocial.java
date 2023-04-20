@@ -550,6 +550,7 @@ public class BeSocial {
 
     public int confirmGroupMembership() {
         
+
         return 1;
     }
 
