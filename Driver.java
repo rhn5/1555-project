@@ -38,7 +38,7 @@ public class Driver {
         BeSocial driver = new BeSocial();
 
         //drop the profile for driver@gmail.com if it already exists. If not, fails
-        driver.dropProfile("driver@gmail.com");
+        driver.dropProfile("driver@gmail.com", "yes");
 
         //creating user profile for driver@gmail.com
         driver.createProfile("test","driver@gmail.com" , "Datadata123", Date.valueOf("2000-01-01"));
@@ -46,7 +46,7 @@ public class Driver {
         driver.createProfile("test","driver@gmail.com" , "Datadata123", Date.valueOf("2000-01-01"));
 
         //drop the profile for driver@gmail.com, should be successful
-        driver.dropProfile("driver@gmail.com");
+        driver.dropProfile("driver@gmail.com", "yes");
 
         //creating user profile for driver@gmail.com again
         driver.createProfile("test","driver@gmail.com" , "Datadata123", Date.valueOf("2000-01-01"));
@@ -96,10 +96,10 @@ public class Driver {
         driver.rankProfiles();
 
         //Testing top Messages
-        driver.topMessages();
+        driver.topMessages(5, 3);
 
         //Test Three Degrees
-        driver.threeDegrees();
+        driver.threeDegrees(10);
 
         //Test Logout
         driver.logout();
