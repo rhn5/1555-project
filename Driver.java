@@ -186,14 +186,23 @@ public class Driver {
                 }
             }
             if (bottomLevel == 1) {
-                System.out.println("Enter loggedIn you want to become friends with:");
+                System.out.println("<-----FRIEND REQUEST----->");
+                System.out.println("Enter UserID you want to become friends with:");
                 int friendID;
                 friendID = kbd.nextInt();
-                beSocial.initiateFriendship(friendID);
-
+                int success = beSocial.initiateFriendship(friendID);
+                if(success == -1)
+                {
+                    System.out.println("<-----FRIEND REQUEST FAILED----->");
+                }
             }
             if (bottomLevel == 2) {
-                beSocial.confirmFriendRequests();
+                System.out.println("<-----CONFIRM FRIEND REQUESTS----->");
+                int success = beSocial.confirmFriendRequests();
+                if(success == -1)
+                {
+                    System.out.println("<-----CONFIRMING FRIEND REQUEST(s) FAILED----->");
+                }
             }
             if (bottomLevel == 3) {
                 System.out.println("<-----CREATE GROUP----->");
@@ -203,14 +212,24 @@ public class Driver {
                 String description = kbd.next();
                 System.out.print("size:");
                 int groupSize = kbd.nextInt();
-                beSocial.createGroup(name,description, groupSize);
+                int success = beSocial.createGroup(name,description, groupSize);
+                
+                if(success == -1)
+                {
+                    System.out.println("<-----GROUP CREATION FAILED----->");
+                }
             }
             if (bottomLevel == 4) {
                 System.out.println("Enter Request Text:");
                 String request = kbd.next();
                 System.out.println("Enter group ID: ");
                 int gID = kbd.nextInt();
-                beSocial.initiateAddingGroup(gID, request);
+                int success = beSocial.initiateAddingGroup(gID, request);
+
+                if(success == -1)
+                {
+                    System.out.println("<-----GROUP REQUEST FAILED----->");
+                }
             }
             if (bottomLevel == 5) {
 
