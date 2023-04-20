@@ -157,7 +157,7 @@ public class Driver {
 
             }
             if (bottomLevel == 2) {
-
+                beSocial.confirmFriendRequests();
             }
             if (bottomLevel == 3) {
 
