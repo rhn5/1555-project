@@ -60,10 +60,9 @@ public class BeSocial {
         Statement countStatement = connection.createStatement();
         ResultSet rs = countStatement.executeQuery(count);
 
-        // testing purpose
-        int userID = 0;
+        int id = -1;
         if (rs.next()) {
-            userID = rs.getInt("count");
+            id = rs.getInt("count") ;
         }
 
         String query = "INSERT INTO profile (userID, name, email, password, dateOfBirth, lastLogin) "
@@ -71,7 +70,7 @@ public class BeSocial {
         try {
             PreparedStatement st = connection.prepareStatement(query);
 
-            st.setInt(1, userID);
+            st.setInt(1, id);
             st.setString(2, name);
             st.setString(3, email);
             st.setString(4, password);
@@ -122,7 +121,7 @@ public class BeSocial {
                 friendName = rs.getString("name");
             }
         } catch (SQLException s) {
-
+            return -1;
         }
         System.out.println("Sending request to " + friendName);
         System.out.print("Type in message you would like to send:");
@@ -229,15 +228,71 @@ public class BeSocial {
         return 1;
     }
 
-    public int createGroup() {
+    public int createGroup(String name, String description, int size) {
+
+
+        String count = "SELECT COUNT(*) FROM groupInfo";
+        int groupID = -1;
+        try{
+            Statement countStatement = connection.createStatement();
+            ResultSet rs = countStatement.executeQuery(count);
+            if(rs.next()){
+                groupID = rs.getInt("count");
+            }
+        }
+        catch(SQLException s){
+            return -1;
+        }
+        
+        String query = "INSERT INTO groupInfo(gID, name, size, description)" + "VALUES (?, ?, ? ,?)";
+        try{
+            PreparedStatement st = connection.prepareStatement(query);
+            st.setInt(1, groupID);
+            st.setString(2, name);
+            st.setInt(3, size);
+            st.setString(4, description);
+            st.executeUpdate();
+        }
+        catch(SQLException s){
+            return -1;
+        }
         return 1;
     }
 
-    public int initiateAddingGroup() {
+    public int initiateAddingGroup(int groupID, String requestText) {
+        //given group ID and request text, create a pending request of adding the logged
+        //in user to the group new entry pending gorup mem
+        String select = "SELECT name FROM groupInfo WHERE gID= "+ groupID;
+        String groupName = "";
+        try{
+            Statement st = connection.createStatement();
+            ResultSet rs = st.executeQuery(select);
+            if(rs.next()){
+                groupName = rs.getString("name");
+            }
+        }
+        catch(SQLException s){
+            return -1;
+        }
+        String insert = "INSERT INTO pendingGroupMember(gID, userID, requestText, requestTime)"
+            + "VALUES (?, ?, ?, ?)";
+        try{
+            PreparedStatement pst = connection.prepareStatement(insert);
+            pst.setInt(1, groupID);
+            pst.setInt(2, userID);
+            pst.setString(3, requestText);
+            pst.setTimestamp(4, clockTime);
+            pst.executeUpdate();
+        }
+        catch(SQLException s){
+            return -1;
+        }
+
         return 1;
     }
 
     public int confirmGroupMembership() {
+        
         return 1;
     }
 
