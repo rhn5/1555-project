@@ -51,7 +51,7 @@ public class Driver {
         driver.login("GautamJain@gmail.com", "pDPECU*6");
         driver.createGroup("driverGroup", "test", 5);
         driver.createGroup("driverGroup2", "test", 5);
-        driver.initiateAddingGroup(0, "test");
+        driver.initiateAddingGroup(10, "test");
         driver.confirmGroupMembership("10");
         driver.leaveGroup("driverGroup");
         driver.searchForProfile("NavinMahal@gmail.com");
