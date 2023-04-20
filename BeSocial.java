@@ -116,7 +116,7 @@ public class BeSocial {
 
         }
         System.out.println("Sending request to " + friendName);
-        System.out.print("Type in message you would like to send ");
+        System.out.print("Type in message you would like to send:");
         String text = scan.nextLine();
 
         // scanner to get confirmation from user
