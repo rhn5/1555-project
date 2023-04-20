@@ -230,6 +230,8 @@ public class BeSocial {
     }
 
     public int createGroup() {
+        String insert = "INSERT INTO groupInfo(gID, name, size, description) " + "Values(?, ? , ? , ?)";
+
         return 1;
     }
 
@@ -258,6 +260,7 @@ public class BeSocial {
     }
 
     public int displayMessages() {
+        String select = "SELECT * from message where toID = " + userID;
         return 1;
     }
 
@@ -286,6 +289,8 @@ public class BeSocial {
     }
 
     public int logout() {
+        userID = -1;
+
         return 1;
     }
 
