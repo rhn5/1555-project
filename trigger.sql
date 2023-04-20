@@ -95,10 +95,12 @@ DECLARE
     member_count INTEGER;
     adminID INTEGER;
     generated_message_id INTEGER;
+    latest_time TIMESTAMP;
 BEGIN
     SELECT COUNT(*) INTO member_count from groupMember where gID = NEW.gID;
     SELECT userID INTO adminID FROM groupMember WHERE gID = NEW.gID AND role = 'Admin' LIMIT 1;
     SELECT name INTO groupName FROM groupinfo WHERE gID = NEW.gID;
+    SELECT MAX(pseudoTime) INTO latest_time FROM Clock;
     
     IF member_count >= NEW.size THEN
         DELETE FROM groupMember WHERE gID = NEW.gID AND userID = NEW.userID;
@@ -115,14 +117,14 @@ BEGIN
             END LOOP;
 
             INSERT INTO message (msgID, fromid, messagebody, togroupid, timesent)
-            VALUES (generated_message_id, NEW.userid, CONCAT('User Added To Group: ', groupName, ' As A Member'), NEW.gID, NOW());
+            VALUES (generated_message_id, NEW.userid, CONCAT('User Added To Group: ', groupName, ' As A Member'), NEW.gID, latest_time);
 
             LOOP
                 generated_message_id := FLOOR(RANDOM() * 100000) + 1;
                 EXIT WHEN NOT EXISTS (SELECT * FROM message WHERE msgID = generated_message_id);
             END LOOP;
             INSERT INTO message (msgID, fromid, messagebody, togroupid, timesent)
-            VALUES (generated_message_id, NEW.userid, CONCAT('You Have Been  Added To Group: ', groupName, ' As A Member'), NEW.gID, NOW());
+            VALUES (generated_message_id, NEW.userid, CONCAT('You Have Been  Added To Group: ', groupName, ' As A Member'), NEW.gID, latest_time);
 
             DELETE FROM pendingGroupMember WHERE gID = NEW.gID AND userID = NEW.userID;
             RETURN NEW;
@@ -133,14 +135,14 @@ BEGIN
                 EXIT WHEN NOT EXISTS (SELECT * FROM message WHERE msgID = generated_message_id);
             END LOOP;
             INSERT INTO message (msgID, fromid, messagebody, togroupid, timesent)
-            VALUES (generated_message_id, NEW.userid, CONCAT('User Added To Group: ', groupName, ' As An Admin'), NEW.gID, NOW());
+            VALUES (generated_message_id, NEW.userid, CONCAT('User Added To Group: ', groupName, ' As An Admin'), NEW.gID, latest_time);
 
             LOOP
                 generated_message_id := FLOOR(RANDOM() * 100000) + 1;
                 EXIT WHEN NOT EXISTS (SELECT * FROM message WHERE msgID = generated_message_id);
             END LOOP;
             INSERT INTO message (msgID, fromid, messagebody, toGroupID, timesent)
-            VALUES (generated_message_id, NEW.userid, CONCAT('You Have Been Added To Group: ', groupName, ' As An Admin'), NEW.gID, NOW());
+            VALUES (generated_message_id, NEW.userid, CONCAT('You Have Been Added To Group: ', groupName, ' As An Admin'), NEW.gID, latest_time);
 
 
             DELETE FROM pendingGroupMember WHERE gID = NEW.gID AND userID = NEW.userID;
@@ -155,7 +157,7 @@ BEGIN
             END LOOP;
 
             INSERT INTO message (msgID, fromID, messageBody, toGroupID, timeSent)
-            VALUES (generated_message_id, NEW.userID, CONCAT('User has been promoted to Admin in ', groupName), NEW.gid, NOW());
+            VALUES (generated_message_id, NEW.userID, CONCAT('User has been promoted to Admin in ', groupName), NEW.gid, latest_time);
 
             -- notify the user of promotion
             LOOP
@@ -164,7 +166,7 @@ BEGIN
             END LOOP;
 
             INSERT INTO message (msgID, fromID, messageBody, toGroupID, timeSent)
-            VALUES (generated_message_id, NEW.userid, CONCAT('Congratulations! You have been promoted to Admin in ', groupName), OLD.userID, NOW());
+            VALUES (generated_message_id, NEW.userid, CONCAT('Congratulations! You have been promoted to Admin in ', groupName), OLD.userID, latest_time);
             RETURN NEW;
 
         ELSIF OLD.role = 'Admin' AND NEW.role = 'Member' THEN
@@ -179,7 +181,7 @@ BEGIN
             END LOOP;
 
             INSERT INTO message (msgID, fromID, messageBody, toGroupID, timeSent)
-            VALUES (generated_message_id, NEW.userid, CONCAT('Admin User ', OLD.userID, ' has been demoted to Member in ', groupName), NEW.gid, NOW());
+            VALUES (generated_message_id, NEW.userid, CONCAT('Admin User ', OLD.userID, ' has been demoted to Member in ', groupName), NEW.gid, latest_time);
 
             -- notify the user of demotion
             LOOP
@@ -188,7 +190,7 @@ BEGIN
             END LOOP;
 
             INSERT INTO message (msgID, fromID, messageBody, toGroupID, timeSent)
-            VALUES (generated_message_id, NEW.userid, CONCAT('You have been demoted to Member in ', groupName), OLD.userID, NOW());
+            VALUES (generated_message_id, NEW.userid, CONCAT('You have been demoted to Member in ', groupName), OLD.userID, latest_time);
             RETURN NEW;
         END IF;
     END IF;
