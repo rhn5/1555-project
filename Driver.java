@@ -56,10 +56,10 @@ public class Driver {
         driver.leaveGroup("driverGroup");
         driver.searchForProfile("NavinMahal@gmail.com");
         driver.sendMessageToUser("NavinMahal@gmail.com", "null");
-        driver.sendMessageToGroup("null");
+        driver.sendMessageToGroup("driverGroup2","text");
         driver.displayMessages();
         driver.displayNewMessages();
-        driver.displayFriends();
+        driver.displayFriends(0);
         driver.rankGroups();
         driver.rankProfiles();
         driver.topMessages(5,10);

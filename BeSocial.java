@@ -284,7 +284,9 @@ public class BeSocial {
                 System.out.println("<-----SEND MESSAGE TO GROUP----->");
                 System.out.println("Enter group name");
                 String groupName = kbd.next();
-                int success = beSocial.sendMessageToGroup(groupName);
+                System.out.println("Enter Message:");
+                String groupMsg = kbd.next();
+                int success = beSocial.sendMessageToGroup(groupName, groupMsg);
                 if(success == -1)
                 {
                     System.out.println("<-----MESSAGE SEND FAILED----->");
@@ -308,7 +310,7 @@ public class BeSocial {
             }
             if (bottomLevel == 12) {           
                 System.out.println("<-----YOUR FRIENDS----->");      
-                int success = beSocial.displayFriends();
+                int success = beSocial.displayFriends(-1);
                 if(success == -1)
                 {
                     System.out.println("<-----MESSAGE DISPLAY FAILED----->");
@@ -907,9 +909,14 @@ public class BeSocial {
                     msgID = rs.getInt("count") ;
                 }
 
-                do {
-                    System.out.println("Sending Message To: " + userName);
-                } while (msgBody.length() > 200 || msgBody.isBlank());
+                
+                System.out.println("Sending Message To: " + userName);
+                
+                if (msgBody.length() > 200 || msgBody.isBlank())
+                {
+                    System.out.println("Error Sending Message (Too many chars or is blank)");
+                    return -1;
+                }
                 message.setInt(1, msgID);
                 message.setInt(2, userID);
                 message.setString(3, msgBody);
@@ -927,13 +934,12 @@ public class BeSocial {
             return 1;
     }
 
-    public int sendMessageToGroup(String toGroupName) {
-        Scanner choices = new Scanner(System.in);
+    public int sendMessageToGroup(String toGroupName, String groupMessage) {
         try {
             PreparedStatement message = connection.prepareStatement("INSERT INTO message VALUES(?, ?, ?, ?, ?, ?)");
             int groupID = getGroupIDByName(toGroupName);
             int msgID;
-            String msgBody;
+            
               String count = "SELECT COUNT(*) FROM message";
               Statement countStatement = connection.createStatement();
               ResultSet rs = countStatement.executeQuery(count);
@@ -942,14 +948,15 @@ public class BeSocial {
                   msgID = rs.getInt("count") ;
               }
             
-            do {
-                System.out.println("Sending Message To: " + toGroupName + " GroupID: " + groupID);
-                System.out.printf("Enter Message [Max 200 chars and can't be blank] -> ");
-                msgBody = choices.next();
-            } while (msgBody.length() > 200 || msgBody.isBlank());
+            System.out.println("Sending Message To: " + toGroupName + " GroupID: " + groupID);
+            if (groupMessage.length() > 200 || groupMessage.isBlank())
+            {
+                System.out.println("Error Sending Message (Too many chars or is blank)");
+                return -1;
+            }
             message.setInt(1, msgID);
             message.setInt(2, userID);
-            message.setString(3, msgBody);
+            message.setString(3, groupMessage);
             message.setNull(4, Types.NULL);
             message.setInt(5, groupID);
             message.setTimestamp(6, Timestamp.from(java.time.Instant.now()));
@@ -1035,10 +1042,10 @@ public class BeSocial {
             }
     }
 
-    public int displayFriends() {
+    public int displayFriends(int friendNo) {
         Scanner choices = new Scanner(System.in);
             boolean done = false;
-
+            int friendID = 0;
             while (!done) {
                 // Display the list of user's friends
                 System.out.println("Your friends:");;
@@ -1054,7 +1061,7 @@ public class BeSocial {
                     ResultSet rs = stmt.executeQuery();
 
                     while (rs.next()) {
-                        int friendID= rs.getInt("userID2");
+                        friendID= rs.getInt("userID2");
                         PreparedStatement stmt2 = connection.prepareStatement("Select name from profile where userID=?");
                         stmt2.setInt(1,friendID);
                         ResultSet rs2 = stmt2.executeQuery();
@@ -1077,7 +1084,14 @@ public class BeSocial {
 
                 // Ask the user to select a friend or go back
                 System.out.print("Enter friend's userID (or 0 to go back): ");
-                int friendID = choices.nextInt();
+                if(friendNo == -1)
+                {
+                    friendID = choices.nextInt();
+                }
+                else
+                {
+                    friendID = friendNo;
+                }
 
                 if (friendID == 0) {
                     done = true;
