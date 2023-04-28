@@ -6,7 +6,17 @@ import java.sql.*;
 import java.util.*;
 
 public class BeSocial {
-
+    public static boolean validateInputs(ArrayList<String> s) {
+        boolean result = true;
+        for (String entry : s) {
+            entry = entry.toLowerCase();
+            if (entry.contains("update") || entry.contains("delete") || entry.contains("select")
+                    || entry.contains("drop")) {
+                result = false;
+            }
+        }
+        return result;
+    }
     private Connection connection;
     private Statement statement;
     private String url;

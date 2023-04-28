@@ -23,17 +23,7 @@ import java.io.IOException;
 
 public class Driver {
 
-    public static boolean validateInputs(ArrayList<String> s) {
-        boolean result = true;
-        for (String entry : s) {
-            entry = entry.toLowerCase();
-            if (entry.contains("update") || entry.contains("delete") || entry.contains("select")
-                    || entry.contains("drop")) {
-                result = false;
-            }
-        }
-        return result;
-    }
+    
     public static void main(String[] args) throws SQLException, ClassNotFoundException, IOException {
         BeSocial driver = new BeSocial();
 
@@ -55,6 +45,10 @@ public class Driver {
         driver.confirmGroupMembership("10");
         driver.leaveGroup("driverGroup");
         driver.searchForProfile("NavinMahal@gmail.com");
+        for(int i = 0; i<10000;i++)
+        {
+            driver.sendMessageToUser("NavinMahal@gmail.com", "null");
+        }
         driver.sendMessageToUser("NavinMahal@gmail.com", "null");
         driver.sendMessageToGroup("driverGroup2","text");
         driver.displayMessages();
@@ -63,7 +57,7 @@ public class Driver {
         driver.rankGroups();
         driver.rankProfiles();
         driver.topMessages(5,10);
-        driver.threeDegrees(10);
+        driver.threeDegrees(57);
         driver.logout();
 
         
