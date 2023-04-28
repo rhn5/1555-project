@@ -38,27 +38,27 @@ public class Driver {
         {
             driver.dropProfile("test214"+i+"@gmail.com", "yes");
         }
-        driver.displayTable("profile");
+        //driver.displayTable("profile");
         driver.logout();
         driver.login("GautamJain@gmail.com", "pDPECU*6");
         driver.createGroup("driverGroup", "test", 5);
-        driver.displayTable("groupInfo");   
+        //driver.displayTable("groupInfo");   
         driver.createGroup("driverGroup2", "test", 5);
-        driver.displayTable("groupInfo");
+        //driver.displayTable("groupInfo");
         driver.initiateAddingGroup(10, "test");
-        driver.displayTable("pendingGroupMember");
+        //driver.displayTable("pendingGroupMember");
         driver.confirmGroupMembership("10");
-        driver.displayTable("groupMember");
+        //driver.displayTable("groupMember");
         driver.leaveGroup("driverGroup");
-        driver.displayTable("leaveGroup");
+        //driver.displayTable("leaveGroup");
         driver.searchForProfile("NavinMahal@gmail.com");
-        for(int i = 0; i<100;i++)
+        for(int i = 0; i<10;i++)
         {
-            driver.sendMessageToUser("NavinMahal@gmail.com", "null");
+            driver.sendMessageToUser("NavinMahal@gmail.com", "message " + i);
         }
-        driver.displayTable("message");
+        //driver.displayTable("message");
         driver.sendMessageToGroup("driverGroup2","text");
-        driver.displayTable("message");
+        //driver.displayTable("message");
         driver.displayMessages();
         driver.displayNewMessages();
         driver.displayFriends(43);
