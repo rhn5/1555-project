@@ -1036,6 +1036,7 @@ public class BeSocial {
     public int displayFriends(int friendNo) {
         Scanner choices = new Scanner(System.in);
         int friendID = 0;
+        int flag = 0;
         while (true) {
             // Display the list of user's friends
             System.out.println("Your friends:");;
@@ -1079,6 +1080,7 @@ public class BeSocial {
             
             {
                 friendID = friendNo;
+                flag =1;
             }
 
             if (friendID == 0) {
@@ -1095,6 +1097,10 @@ public class BeSocial {
                         String active = rs.getString("lastLogin");
                         System.out.printf("Name: %s\nEmail: %s\nDOB: %s\nLast Active: %s\n",
                                 name, email, dob, active);
+                        if(flag == 1)
+                        {
+                            return 1;
+                        }
                     } else {
                         System.out.println("Error: friend not found");
                         return -1;
