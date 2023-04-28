@@ -6,17 +6,7 @@ import java.sql.*;
 import java.util.*;
 
 public class BeSocial {
-    public static boolean validateInputs(ArrayList<String> s) {
-        boolean result = true;
-        for (String entry : s) {
-            entry = entry.toLowerCase();
-            if (entry.contains("update") || entry.contains("delete") || entry.contains("select")
-                    || entry.contains("drop")) {
-                result = false;
-            }
-        }
-        return result;
-    }
+
     private Connection connection;
     private Statement statement;
     private String url;
@@ -72,14 +62,14 @@ public class BeSocial {
             {
                 System.out.println("<-----CREATE PROFILE----->");
                 System.out.print("Name: ");
-                String name = kbd.next();
+                String name = kbd.nextLine();
                 System.out.print("Email: ");
-                String userEmail = kbd.next();
-                System.out.print("Password\n");
-                System.out.print("Minimum 8 Characters\nOne Uppercase\nOne Lowercase\nOne Number\n");
-                String userPass = kbd.next();
+                String userEmail = kbd.nextLine();
+                System.out.println("Password");
+                System.out.println("Minimum 8 Characters, One Uppercase, One Lowercase, One Number");
+                String userPass = kbd.nextLine();
                 System.out.print("DOB (yyyy-mm-dd): ");
-                String dob = kbd.next();
+                String dob = kbd.nextLine();
                 Date dateOfBirth = Date.valueOf(dob);
 
                 beSocial.createProfile(name, userEmail, userPass, dateOfBirth);
@@ -401,6 +391,7 @@ public class BeSocial {
             rs.close();
         } catch (Exception e) {
             e.printStackTrace();
+            System.exit(0);
         }
     }
 
@@ -1526,5 +1517,21 @@ public class BeSocial {
             System.out.println("Error retrieving groupID: " + e.getMessage());
         }
         return groupName;
+    }
+
+    public void displayTable(String tableName) {
+        PreparedStatement st;
+        try {
+            st = connection.prepareStatement("SELECT * FROM ?");
+            st.setString(1, tableName);
+            ResultSet set = st.executeQuery();
+            System.out.printf("Contents For Table <%s>\n");
+            while (set.next()) {
+                System.out.printf("Row #%d: %s\n", set.getRow(), set);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error Pulling Table Data");
+        }
+
     }
 }
