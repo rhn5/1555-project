@@ -45,7 +45,7 @@ public class Driver {
         driver.confirmGroupMembership("10");
         driver.leaveGroup("driverGroup");
         driver.searchForProfile("NavinMahal@gmail.com");
-        for(int i = 0; i<10000;i++)
+        for(int i = 0; i<100;i++)
         {
             driver.sendMessageToUser("NavinMahal@gmail.com", "null");
         }
@@ -53,7 +53,7 @@ public class Driver {
         driver.sendMessageToGroup("driverGroup2","text");
         driver.displayMessages();
         driver.displayNewMessages();
-        driver.displayFriends(0);
+        driver.displayFriends(43);
         driver.rankGroups();
         driver.rankProfiles();
         driver.topMessages(5,10);
