@@ -1085,6 +1085,7 @@ public class BeSocial {
                 friendID = choices.nextInt();
             }
             else
+            
             {
                 friendID = friendNo;
             }
